@@ -1,5 +1,6 @@
 package types
 
 type Config struct {
-	BaseUrl string `envconfig:"BASE_URL" default:"https://data.gopher-ai.com"`
+	BaseUrl string `envconfig:"GOPHER_CLIENT_URL" default:"https://data.gopher-ai.com"`
+	Token   string `envconfig:"GOPHER_CLIENT_TOKEN"`
 }

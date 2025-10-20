@@ -14,7 +14,8 @@ var _ = Describe("Config", func() {
 		Context("when no environment variables are set", func() {
 			BeforeEach(func() {
 				// Clear any existing environment variables
-				os.Unsetenv("BASE_URL")
+				os.Unsetenv("GOPHER_CLIENT_URL")
+				os.Unsetenv("GOPHER_CLIENT_TOKEN")
 			})
 
 			It("should load default values", func() {
@@ -23,16 +24,19 @@ var _ = Describe("Config", func() {
 				Expect(cfg).NotTo(BeNil())
 
 				Expect(cfg.BaseUrl).To(Equal("https://data.gopher-ai.com"))
+				Expect(cfg.Token).To(Equal(""))
 			})
 		})
 
 		Context("when environment variables are set", func() {
 			BeforeEach(func() {
-				os.Setenv("BASE_URL", "https://api.example.com")
+				os.Setenv("GOPHER_CLIENT_URL", "https://api.example.com")
+				os.Setenv("GOPHER_CLIENT_TOKEN", "test-token-123")
 			})
 
 			AfterEach(func() {
-				os.Unsetenv("BASE_URL")
+				os.Unsetenv("GOPHER_CLIENT_URL")
+				os.Unsetenv("GOPHER_CLIENT_TOKEN")
 			})
 
 			It("should load values from environment variables", func() {
@@ -41,24 +45,28 @@ var _ = Describe("Config", func() {
 				Expect(cfg).NotTo(BeNil())
 
 				Expect(cfg.BaseUrl).To(Equal("https://api.example.com"))
+				Expect(cfg.Token).To(Equal("test-token-123"))
 			})
 		})
 
-		Context("when environment variable is empty", func() {
+		Context("when environment variables are empty", func() {
 			BeforeEach(func() {
-				os.Setenv("BASE_URL", "")
+				os.Setenv("GOPHER_CLIENT_URL", "")
+				os.Setenv("GOPHER_CLIENT_TOKEN", "")
 			})
 
 			AfterEach(func() {
-				os.Unsetenv("BASE_URL")
+				os.Unsetenv("GOPHER_CLIENT_URL")
+				os.Unsetenv("GOPHER_CLIENT_TOKEN")
 			})
 
-			It("should use empty value when environment variable is set to empty string", func() {
+			It("should use empty values when environment variables are set to empty strings", func() {
 				cfg, err := config.LoadConfig()
 				Expect(err).NotTo(HaveOccurred())
 				Expect(cfg).NotTo(BeNil())
 
 				Expect(cfg.BaseUrl).To(Equal(""))
+				Expect(cfg.Token).To(Equal(""))
 			})
 		})
 
@@ -66,14 +74,16 @@ var _ = Describe("Config", func() {
 			var envFile string
 
 			BeforeEach(func() {
-				envContent := `BASE_URL=https://staging.example.com`
+				envContent := `GOPHER_CLIENT_URL=https://staging.example.com
+GOPHER_CLIENT_TOKEN=staging-token-456`
 
 				envFile = ".env.test"
 				err := os.WriteFile(envFile, []byte(envContent), 0644)
 				Expect(err).NotTo(HaveOccurred())
 
 				// Clear environment variables to test .env file loading
-				os.Unsetenv("BASE_URL")
+				os.Unsetenv("GOPHER_CLIENT_URL")
+				os.Unsetenv("GOPHER_CLIENT_TOKEN")
 
 				// Temporarily rename the test file to .env
 				err = os.Rename(envFile, ".env")
@@ -91,6 +101,7 @@ var _ = Describe("Config", func() {
 				Expect(cfg).NotTo(BeNil())
 
 				Expect(cfg.BaseUrl).To(Equal("https://staging.example.com"))
+				Expect(cfg.Token).To(Equal("staging-token-456"))
 			})
 		})
 	})
@@ -98,11 +109,13 @@ var _ = Describe("Config", func() {
 	Describe("MustLoadConfig", func() {
 		Context("when configuration is valid", func() {
 			BeforeEach(func() {
-				os.Setenv("BASE_URL", "https://production.example.com")
+				os.Setenv("GOPHER_CLIENT_URL", "https://production.example.com")
+				os.Setenv("GOPHER_CLIENT_TOKEN", "production-token-789")
 			})
 
 			AfterEach(func() {
-				os.Unsetenv("BASE_URL")
+				os.Unsetenv("GOPHER_CLIENT_URL")
+				os.Unsetenv("GOPHER_CLIENT_TOKEN")
 			})
 
 			It("should load configuration without panicking", func() {
@@ -110,6 +123,7 @@ var _ = Describe("Config", func() {
 				Expect(cfg).NotTo(BeNil())
 
 				Expect(cfg.BaseUrl).To(Equal("https://production.example.com"))
+				Expect(cfg.Token).To(Equal("production-token-789"))
 			})
 		})
 	})
@@ -119,9 +133,11 @@ var _ = Describe("Config", func() {
 			It("should allow field access and modification", func() {
 				cfg := &types.Config{
 					BaseUrl: "https://custom.example.com",
+					Token:   "custom-token-abc",
 				}
 
 				Expect(cfg.BaseUrl).To(Equal("https://custom.example.com"))
+				Expect(cfg.Token).To(Equal("custom-token-abc"))
 			})
 		})
 	})
@@ -129,11 +145,13 @@ var _ = Describe("Config", func() {
 
 var _ = Describe("Config Performance", func() {
 	BeforeEach(func() {
-		os.Setenv("BASE_URL", "https://performance.example.com")
+		os.Setenv("GOPHER_CLIENT_URL", "https://performance.example.com")
+		os.Setenv("GOPHER_CLIENT_TOKEN", "performance-token-xyz")
 	})
 
 	AfterEach(func() {
-		os.Unsetenv("BASE_URL")
+		os.Unsetenv("GOPHER_CLIENT_URL")
+		os.Unsetenv("GOPHER_CLIENT_TOKEN")
 	})
 
 	It("should load configuration quickly", func() {
@@ -142,5 +160,6 @@ var _ = Describe("Config Performance", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(cfg).NotTo(BeNil())
 		Expect(cfg.BaseUrl).To(Equal("https://performance.example.com"))
+		Expect(cfg.Token).To(Equal("performance-token-xyz"))
 	})
 })

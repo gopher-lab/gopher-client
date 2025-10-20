@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/gopher-lab/gopher-client/config"
 	"github.com/masa-finance/tee-worker/api/types"
 )
 
@@ -25,6 +26,28 @@ func NewClient(baseURL string, token string) *Client {
 		BaseURL: baseURL,
 		Token:   token,
 	}
+}
+
+// NewClientFromConfig creates a new API client from configuration
+func NewClientFromConfig() (*Client, error) {
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load config: %w", err)
+	}
+
+	return &Client{
+		BaseURL: cfg.BaseUrl,
+		Token:   cfg.Token,
+	}, nil
+}
+
+// MustNewClientFromConfig creates a new API client from configuration and panics on error
+func MustNewClientFromConfig() *Client {
+	client, err := NewClientFromConfig()
+	if err != nil {
+		panic(fmt.Sprintf("failed to create client from config: %v", err))
+	}
+	return client
 }
 
 func getErrorFromResponse(body []byte) error {
