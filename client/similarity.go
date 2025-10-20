@@ -15,8 +15,7 @@ func (c *Client) PerformSimilaritySearch(
 	keywords []string,
 	operator string,
 	maxResults int,
-	receiver any,
-) error {
+) ([]types.Document, error) {
 	requestBody, err := json.Marshal(jobs.SimilaritySearchParams{
 		Query:           query,
 		Keywords:        keywords,
@@ -26,12 +25,14 @@ func (c *Client) PerformSimilaritySearch(
 	})
 	if err != nil {
 		log.Error("Error while performing similarity search", "query", query, "keywords", keywords, "error", err.Error())
-		return err
+		return nil, err
 	}
 
-	err = c.doImmediateRequest(c.BaseURL+"/v1/search/similarity", requestBody, receiver)
+	var results []types.Document
+	err = c.doImmediateRequest(c.BaseURL+"/v1/search/similarity", requestBody, &results)
 	if err != nil {
 		log.Error("Error while performing similarity search", "query", query, "keywords", keywords, "error", err.Error())
+		return nil, err
 	}
-	return err
+	return results, nil
 }

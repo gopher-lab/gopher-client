@@ -30,8 +30,7 @@ var _ = Describe("Hybrid Client", func() {
 				operator := "or"
 				maxResults := 10
 
-				var results []types.Document
-				err := client.PerformHybridSearch(query, sources, text, queryWeight, textWeight, keywords, operator, maxResults, &results)
+				results, err := client.PerformHybridSearch(query, sources, text, queryWeight, textWeight, keywords, operator, maxResults)
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(results).NotTo(BeNil())
@@ -51,8 +50,7 @@ var _ = Describe("Hybrid Client", func() {
 				operator := "and"
 				maxResults := 5
 
-				var results []types.Document
-				err := client.PerformHybridSearch(query, sources, text, queryWeight, textWeight, keywords, operator, maxResults, &results)
+				results, err := client.PerformHybridSearch(query, sources, text, queryWeight, textWeight, keywords, operator, maxResults)
 
 				// The API might return an error for empty query, which is expected
 				if err != nil {

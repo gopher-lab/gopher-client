@@ -486,31 +486,27 @@ sources := []types.Source{
 }
 
 // Perform similarity search
-var results []types.SearchResult
-err := client.PerformSimilaritySearch(
+results, err := client.PerformSimilaritySearch(
     "artificial intelligence",  // query
     sources,                    // sources to search
     []string{"AI", "machine learning"}, // keywords
-    "AND",                      // keyword operator
+    "and",                      // keyword operator
     10,                         // max results
-    &results,                   // receiver for results
 )
 ```
 
 #### Hybrid Search
 ```go
 // Perform hybrid search combining text and similarity queries
-var results []types.SearchResult
-err := client.PerformHybridSearch(
+results, err := client.PerformHybridSearch(
     "machine learning",         // text query
     sources,                    // sources to search
     "artificial intelligence",  // similarity text
     0.7,                        // query weight
     0.3,                        // text weight
     []string{"AI", "ML"},       // keywords
-    "OR",                       // keyword operator
+    "or",                       // keyword operator
     15,                         // max results
-    &results,                   // receiver for results
 )
 ```
 

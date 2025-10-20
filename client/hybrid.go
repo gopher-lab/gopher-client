@@ -18,8 +18,7 @@ func (c *Client) PerformHybridSearch(
 	keywords []string,
 	operator string,
 	maxResults int,
-	receiver any,
-) error {
+) ([]types.Document, error) {
 	requestBody, err := json.Marshal(jobs.HybridSearchParams{
 		TextQuery:       jobs.HybridQuery{Query: query, Weight: queryWeight},
 		SimilarityQuery: jobs.HybridQuery{Query: text, Weight: textWeight},
@@ -30,12 +29,14 @@ func (c *Client) PerformHybridSearch(
 	})
 	if err != nil {
 		log.Error("Error while performing hybrid web search", "query", query, "text", text, "error", err.Error())
-		return err
+		return nil, err
 	}
 
-	err = c.doImmediateRequest(c.BaseURL+"/v1/search/hybrid", requestBody, receiver)
+	var results []types.Document
+	err = c.doImmediateRequest(c.BaseURL+"/v1/search/hybrid", requestBody, &results)
 	if err != nil {
 		log.Error("Error while performing hybrid web search", "query", query, "text", text, "error", err.Error())
+		return nil, err
 	}
-	return err
+	return results, nil
 }
