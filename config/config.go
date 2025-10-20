@@ -1,7 +1,7 @@
 package config
 
 import (
-	"log"
+	"github.com/gopher-lab/gopher-client/log"
 
 	"github.com/gopher-lab/gopher-client/types"
 	"github.com/joho/godotenv"
@@ -15,7 +15,7 @@ func LoadConfig() (*types.Config, error) {
 	// Try to load .env file (optional)
 	if err := godotenv.Load(); err != nil {
 		// .env file not found or couldn't be loaded, continue with system env vars
-		log.Printf("Warning: Could not load .env file: %v", err)
+		log.Warn("Warning: Could not load .env file: %v", err)
 	}
 
 	var config types.Config
@@ -31,7 +31,7 @@ func LoadConfig() (*types.Config, error) {
 func MustLoadConfig() *types.Config {
 	config, err := LoadConfig()
 	if err != nil {
-		log.Fatalf("Failed to load search configuration: %v", err)
+		log.Warn("Failed to load search configuration: %v", err)
 	}
 	return config
 }
