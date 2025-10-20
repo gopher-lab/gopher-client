@@ -1,6 +1,9 @@
 package config
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/gopher-lab/gopher-client/log"
 
 	"github.com/gopher-lab/gopher-client/types"
@@ -13,9 +16,37 @@ import (
 // The .env file loading is optional - if the file doesn't exist, it will continue without error.
 func LoadConfig() (*types.Config, error) {
 	// Try to load .env file (optional)
-	if err := godotenv.Load(); err != nil {
-		// .env file not found or couldn't be loaded, continue with system env vars
-		log.Warn("Warning: Could not load .env file: %v", err)
+	// Look for .env file in current directory and parent directories
+	envFiles := []string{".env", "../.env", "../../.env"}
+	var loaded bool
+	for _, envFile := range envFiles {
+		if err := godotenv.Load(envFile); err == nil {
+			loaded = true
+			break
+		}
+	}
+
+	if !loaded {
+		// Try to find .env file by walking up the directory tree
+		wd, _ := os.Getwd()
+		for {
+			envPath := filepath.Join(wd, ".env")
+			if _, err := os.Stat(envPath); err == nil {
+				if err := godotenv.Load(envPath); err == nil {
+					loaded = true
+					break
+				}
+			}
+			parent := filepath.Dir(wd)
+			if parent == wd {
+				break // reached root directory
+			}
+			wd = parent
+		}
+	}
+
+	if !loaded {
+		log.Warn("Could not find .env file in current or parent directories")
 	}
 
 	var config types.Config
@@ -31,7 +62,7 @@ func LoadConfig() (*types.Config, error) {
 func MustLoadConfig() *types.Config {
 	config, err := LoadConfig()
 	if err != nil {
-		log.Warn("Failed to load search configuration: %v", err)
+		log.Warn("Failed to load search configuration", "error", err)
 	}
 	return config
 }

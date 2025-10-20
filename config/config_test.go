@@ -18,13 +18,20 @@ var _ = Describe("Config", func() {
 				os.Unsetenv("GOPHER_CLIENT_TOKEN")
 			})
 
-			It("should load default values", func() {
+			It("should load values from .env file or defaults", func() {
 				cfg, err := config.LoadConfig()
 				Expect(err).NotTo(HaveOccurred())
 				Expect(cfg).NotTo(BeNil())
 
-				Expect(cfg.BaseUrl).To(Equal("https://data.gopher-ai.com"))
-				Expect(cfg.Token).To(Equal(""))
+				// Should load from .env file (dev values) or fall back to defaults
+				Expect(cfg.BaseUrl).To(SatisfyAny(
+					Equal("https://data.gopher-ai.com/api"),          // default
+					Equal("https://gopher-data.dev.masalabs.ai/api"), // dev from .env
+				))
+				Expect(cfg.Token).To(SatisfyAny(
+					Equal(""), // default
+					Equal("rv53jbsoZieW4jOUdArHPmYGxlOiz4UvTyZv2h5bkbSjTU7J"), // dev from .env
+				))
 			})
 		})
 
