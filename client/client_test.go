@@ -207,17 +207,23 @@ var _ = Describe("Client", func() {
 		Context("WaitForJobCompletion", func() {
 			It("should timeout when job doesn't complete", func() {
 				jobID := "test-job-timeout"
-				timeout := 100 * time.Millisecond
 
-				// This should timeout quickly since we're using an invalid URL
-				_, err := client.WaitForJobCompletion(jobID, timeout)
+				// Create a client with a very short timeout to test timeout behavior
+				timeoutClient := &Client{
+					BaseURL: "https://httpbin.org", // Use a real, reliable endpoint
+					Token:   "test-token",
+					Timeout: 100 * time.Millisecond, // Very short timeout
+				}
+
+				// This should timeout quickly due to the short timeout
+				_, err := timeoutClient.WaitForJobCompletion(jobID)
 
 				Expect(err).NotTo(BeNil())
 				Expect(err.Error()).To(ContainSubstring("timed out after"))
 			})
 		})
 
-		Context("WaitForJobCompletionWithDefaultTimeout", func() {
+		Context("WaitForJobCompletion with config timeout", func() {
 			BeforeEach(func() {
 				os.Setenv("GOPHER_CLIENT_TIMEOUT", "500ms")
 			})
@@ -226,11 +232,15 @@ var _ = Describe("Client", func() {
 				os.Unsetenv("GOPHER_CLIENT_TIMEOUT")
 			})
 
-			It("should use default timeout from config", func() {
-				jobID := "test-job-default-timeout"
+			It("should use timeout from config", func() {
+				jobID := "test-job-config-timeout"
+
+				// Create client from config to use the timeout
+				configClient, err := NewClientFromConfig()
+				Expect(err).To(BeNil())
 
 				// This should timeout quickly since we're using an invalid URL
-				_, err := client.WaitForJobCompletionWithDefaultTimeout(jobID)
+				_, err = configClient.WaitForJobCompletion(jobID)
 
 				Expect(err).NotTo(BeNil())
 				Expect(err.Error()).To(ContainSubstring("timed out after"))
@@ -248,6 +258,7 @@ var _ = Describe("Client", func() {
 
 				Expect(client.BaseURL).To(Equal(baseURL))
 				Expect(client.Token).To(Equal(token))
+				Expect(client.Timeout).To(Equal(60 * time.Second))
 			})
 		})
 	})

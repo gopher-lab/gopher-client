@@ -20,6 +20,8 @@ export GOPHER_CLIENT_TIMEOUT="120s"  # Optional: default is 60s
 export GOPHER_CLIENT_URL="https://data.gopher-ai.com" # Optional: default is present
 ```
 
+**Note:** The `GOPHER_CLIENT_TIMEOUT` environment variable automatically configures timeouts for all `AndWait` methods and HTTP requests.
+
 ### Using Environment Variables (Recommended)
 ```go
 package main
@@ -107,7 +109,7 @@ result, err := client.PerformWebSearch("https://example.com")
 fmt.Printf("Job ID: %s\n", result.UUID)
 
 // Wait for results
-results, err := client.PerformWebSearchAndWait("https://example.com", 2*time.Minute)
+results, err := client.PerformWebSearchAndWait("https://example.com")
 ```
 
 ### 🐦 Twitter Search
@@ -117,7 +119,7 @@ result, err := client.PerformTwitterSearch("golang programming")
 fmt.Printf("Job ID: %s\n", result.UUID)
 
 // Wait for results
-results, err := client.PerformTwitterSearchAndWait("golang programming", 2*time.Minute)
+results, err := client.PerformTwitterSearchAndWait("golang programming")
 ```
 
 ### 👽 Reddit Search
@@ -128,9 +130,9 @@ result, err := client.PerformRedditSearchUsers("username", 5)
 result, err := client.PerformRedditScrapeURL("https://reddit.com/r/golang", 10)
 
 // Wait for results
-results, err := client.PerformRedditSearchPostsAndWait("golang", 10, 2*time.Minute)
-results, err := client.PerformRedditSearchUsersAndWait("username", 5, 2*time.Minute)
-results, err := client.PerformRedditScrapeURLAndWait("https://reddit.com/r/golang", 10, 2*time.Minute)
+results, err := client.PerformRedditSearchPostsAndWait("golang", 10)
+results, err := client.PerformRedditSearchUsersAndWait("username", 5)
+results, err := client.PerformRedditScrapeURLAndWait("https://reddit.com/r/golang", 10)
 ```
 
 ### 💼 LinkedIn Search
@@ -141,7 +143,7 @@ import ptypes "github.com/masa-finance/tee-worker/api/types/linkedin/profile"
 result, err := client.PerformLinkedInSearch("software engineer", ptypes.ScraperModeShort)
 
 // Wait for results
-results, err := client.PerformLinkedInSearchAndWait("software engineer", ptypes.ScraperModeShort, 2*time.Minute)
+results, err := client.PerformLinkedInSearchAndWait("software engineer", ptypes.ScraperModeShort)
 ```
 
 ### 🎵 TikTok Search
@@ -152,9 +154,9 @@ result, err := client.PerformTikTokSearchByTrending("views", 20)
 result, err := client.PerformTikTokTranscription("https://tiktok.com/@user/video/123")
 
 // Wait for results
-results, err := client.PerformTikTokSearchAndWait("golang tutorial", 10, 2*time.Minute)
-results, err := client.PerformTikTokSearchByTrendingAndWait("views", 20, 2*time.Minute)
-results, err := client.PerformTikTokTranscriptionAndWait("https://tiktok.com/@user/video/123", 3*time.Minute)
+results, err := client.PerformTikTokSearchAndWait("golang tutorial", 10)
+results, err := client.PerformTikTokSearchByTrendingAndWait("views", 20)
+results, err := client.PerformTikTokTranscriptionAndWait("https://tiktok.com/@user/video/123")
 ```
 
 ### 🔍 Advanced Search
@@ -235,7 +237,7 @@ args.FollowRedirects = true
 args.UserAgent = "CustomBot/1.0"
 
 // Submit job with custom arguments and wait
-results, err := client.PostWebJobAndWait(args, 3*time.Minute)
+results, err := client.PostWebJobAndWait(args)
 if err != nil {
     log.Fatal(err)
 }
@@ -256,7 +258,7 @@ args.ResultType = "recent"
 args.IncludeEntities = true
 
 // Submit job with custom arguments and wait
-results, err := client.PostTwitterJobAndWait(args, 2*time.Minute)
+results, err := client.PostTwitterJobAndWait(args)
 if err != nil {
     log.Fatal(err)
 }
@@ -276,7 +278,7 @@ args.Sort = "hot"
 args.TimeFilter = "week"
 
 // Submit job with custom arguments and wait
-results, err := client.PostRedditJobAndWait(args, 2*time.Minute)
+results, err := client.PostRedditJobAndWait(args)
 if err != nil {
     log.Fatal(err)
 }
@@ -300,7 +302,7 @@ args.Location = "San Francisco"
 args.ExperienceLevel = "mid-senior"
 
 // Submit job with custom arguments and wait
-results, err := client.PostLinkedInJobAndWait(args, 3*time.Minute)
+results, err := client.PostLinkedInJobAndWait(args)
 if err != nil {
     log.Fatal(err)
 }
@@ -322,7 +324,7 @@ searchArgs.Search = []string{"golang tutorial", "go programming"}
 searchArgs.MaxItems = 30
 searchArgs.SortBy = "date"
 
-results, err := client.PostTikTokSearchJobAndWait(searchArgs, 2*time.Minute)
+results, err := client.PostTikTokSearchJobAndWait(searchArgs)
 if err != nil {
     log.Fatal(err)
 }
@@ -333,7 +335,7 @@ trendingArgs.SortBy = "views"
 trendingArgs.MaxItems = 50
 trendingArgs.Region = "US"
 
-trendingResults, err := client.PostTikTokTrendingJobAndWait(trendingArgs, 2*time.Minute)
+trendingResults, err := client.PostTikTokTrendingJobAndWait(trendingArgs)
 if err != nil {
     log.Fatal(err)
 }
@@ -343,7 +345,7 @@ transcriptionArgs := transcription.NewArguments()
 transcriptionArgs.VideoURL = "https://tiktok.com/@user/video/123"
 transcriptionArgs.Language = "en"
 
-transcriptionResults, err := client.PostTikTokTranscriptionJobAndWait(transcriptionArgs, 3*time.Minute)
+transcriptionResults, err := client.PostTikTokTranscriptionJobAndWait(transcriptionArgs)
 if err != nil {
     log.Fatal(err)
 }
@@ -366,7 +368,7 @@ go func() {
     args.Query = "artificial intelligence"
     args.MaxResults = 50
     
-    docs, err := client.PostTwitterJobAndWait(args, 2*time.Minute)
+    docs, err := client.PostTwitterJobAndWait(args)
     if err == nil {
         results["twitter"] = docs
     }
@@ -380,7 +382,7 @@ go func() {
     args.Queries = []string{"AI", "machine learning"}
     args.MaxItems = 30
     
-    docs, err := client.PostRedditJobAndWait(args, 2*time.Minute)
+    docs, err := client.PostRedditJobAndWait(args)
     if err == nil {
         results["reddit"] = docs
     }
@@ -394,7 +396,7 @@ go func() {
     args.URL = "https://example-ai-blog.com"
     args.MaxDepth = 2
     
-    docs, err := client.PostWebJobAndWait(args, 2*time.Minute)
+    docs, err := client.PostWebJobAndWait(args)
     if err == nil {
         results["web"] = docs
     }

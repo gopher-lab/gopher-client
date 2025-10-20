@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/masa-finance/tee-worker/api/args/twitter/search"
 	"github.com/masa-finance/tee-worker/api/jobs"
@@ -34,7 +33,7 @@ func (c *Client) PerformTwitterSearch(query string) (*types.ResultResponse, erro
 }
 
 // PerformTwitterSearchAndWait performs a Twitter search and waits for completion
-func (c *Client) PerformTwitterSearchAndWait(query string, timeout time.Duration) ([]types.Document, error) {
+func (c *Client) PerformTwitterSearchAndWait(query string) ([]types.Document, error) {
 	resp, err := c.PerformTwitterSearch(query)
 	if err != nil {
 		return nil, err
@@ -42,11 +41,11 @@ func (c *Client) PerformTwitterSearchAndWait(query string, timeout time.Duration
 	if resp.Error != "" {
 		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
 	}
-	return c.WaitForJobCompletion(resp.UUID, timeout)
+	return c.WaitForJobCompletion(resp.UUID)
 }
 
 // PostTwitterJobAndWait posts a Twitter job and waits for completion
-func (c *Client) PostTwitterJobAndWait(args search.Arguments, timeout time.Duration) ([]types.Document, error) {
+func (c *Client) PostTwitterJobAndWait(args search.Arguments) ([]types.Document, error) {
 	resp, err := c.PostTwitterJob(args)
 	if err != nil {
 		return nil, err
@@ -54,5 +53,5 @@ func (c *Client) PostTwitterJobAndWait(args search.Arguments, timeout time.Durat
 	if resp.Error != "" {
 		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
 	}
-	return c.WaitForJobCompletion(resp.UUID, timeout)
+	return c.WaitForJobCompletion(resp.UUID)
 }

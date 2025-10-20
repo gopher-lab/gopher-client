@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/masa-finance/tee-worker/api/args/reddit/search"
 	"github.com/masa-finance/tee-worker/api/jobs"
@@ -71,7 +70,7 @@ func (c *Client) PerformRedditSearchCommunities(query string, maxItems uint) (*t
 }
 
 // PerformRedditScrapeURLAndWait performs a Reddit scrape and waits for completion
-func (c *Client) PerformRedditScrapeURLAndWait(url string, maxItems uint, timeout time.Duration) ([]types.Document, error) {
+func (c *Client) PerformRedditScrapeURLAndWait(url string, maxItems uint) ([]types.Document, error) {
 	resp, err := c.PerformRedditScrapeURL(url, maxItems)
 	if err != nil {
 		return nil, err
@@ -79,11 +78,11 @@ func (c *Client) PerformRedditScrapeURLAndWait(url string, maxItems uint, timeou
 	if resp.Error != "" {
 		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
 	}
-	return c.WaitForJobCompletion(resp.UUID, timeout)
+	return c.WaitForJobCompletion(resp.UUID)
 }
 
 // PerformRedditSearchPostsAndWait performs a Reddit search posts and waits for completion
-func (c *Client) PerformRedditSearchPostsAndWait(query string, maxItems uint, timeout time.Duration) ([]types.Document, error) {
+func (c *Client) PerformRedditSearchPostsAndWait(query string, maxItems uint) ([]types.Document, error) {
 	resp, err := c.PerformRedditSearchPosts(query, maxItems)
 	if err != nil {
 		return nil, err
@@ -91,11 +90,11 @@ func (c *Client) PerformRedditSearchPostsAndWait(query string, maxItems uint, ti
 	if resp.Error != "" {
 		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
 	}
-	return c.WaitForJobCompletion(resp.UUID, timeout)
+	return c.WaitForJobCompletion(resp.UUID)
 }
 
 // PerformRedditSearchUsersAndWait performs a Reddit search users and waits for completion
-func (c *Client) PerformRedditSearchUsersAndWait(query string, maxItems uint, timeout time.Duration) ([]types.Document, error) {
+func (c *Client) PerformRedditSearchUsersAndWait(query string, maxItems uint) ([]types.Document, error) {
 	resp, err := c.PerformRedditSearchUsers(query, maxItems)
 	if err != nil {
 		return nil, err
@@ -103,11 +102,11 @@ func (c *Client) PerformRedditSearchUsersAndWait(query string, maxItems uint, ti
 	if resp.Error != "" {
 		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
 	}
-	return c.WaitForJobCompletion(resp.UUID, timeout)
+	return c.WaitForJobCompletion(resp.UUID)
 }
 
 // PerformRedditSearchCommunitiesAndWait performs a Reddit search communities and waits for completion
-func (c *Client) PerformRedditSearchCommunitiesAndWait(query string, maxItems uint, timeout time.Duration) ([]types.Document, error) {
+func (c *Client) PerformRedditSearchCommunitiesAndWait(query string, maxItems uint) ([]types.Document, error) {
 	resp, err := c.PerformRedditSearchCommunities(query, maxItems)
 	if err != nil {
 		return nil, err
@@ -115,11 +114,11 @@ func (c *Client) PerformRedditSearchCommunitiesAndWait(query string, maxItems ui
 	if resp.Error != "" {
 		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
 	}
-	return c.WaitForJobCompletion(resp.UUID, timeout)
+	return c.WaitForJobCompletion(resp.UUID)
 }
 
 // PostRedditJobAndWait posts a Reddit job and waits for completion
-func (c *Client) PostRedditJobAndWait(args search.Arguments, timeout time.Duration) ([]types.Document, error) {
+func (c *Client) PostRedditJobAndWait(args search.Arguments) ([]types.Document, error) {
 	resp, err := c.PostRedditJob(args)
 	if err != nil {
 		return nil, err
@@ -127,5 +126,5 @@ func (c *Client) PostRedditJobAndWait(args search.Arguments, timeout time.Durati
 	if resp.Error != "" {
 		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
 	}
-	return c.WaitForJobCompletion(resp.UUID, timeout)
+	return c.WaitForJobCompletion(resp.UUID)
 }

@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/masa-finance/tee-worker/api/args/web/page"
 	"github.com/masa-finance/tee-worker/api/jobs"
@@ -34,7 +33,7 @@ func (c *Client) PerformWebSearch(url string) (*types.ResultResponse, error) {
 }
 
 // PerformWebSearchAndWait performs a web search and waits for completion
-func (c *Client) PerformWebSearchAndWait(url string, timeout time.Duration) ([]types.Document, error) {
+func (c *Client) PerformWebSearchAndWait(url string) ([]types.Document, error) {
 	resp, err := c.PerformWebSearch(url)
 	if err != nil {
 		return nil, err
@@ -42,11 +41,11 @@ func (c *Client) PerformWebSearchAndWait(url string, timeout time.Duration) ([]t
 	if resp.Error != "" {
 		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
 	}
-	return c.WaitForJobCompletion(resp.UUID, timeout)
+	return c.WaitForJobCompletion(resp.UUID)
 }
 
 // PostWebJobAndWait posts a web job and waits for completion
-func (c *Client) PostWebJobAndWait(args page.Arguments, timeout time.Duration) ([]types.Document, error) {
+func (c *Client) PostWebJobAndWait(args page.Arguments) ([]types.Document, error) {
 	resp, err := c.PostWebJob(args)
 	if err != nil {
 		return nil, err
@@ -54,5 +53,5 @@ func (c *Client) PostWebJobAndWait(args page.Arguments, timeout time.Duration) (
 	if resp.Error != "" {
 		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
 	}
-	return c.WaitForJobCompletion(resp.UUID, timeout)
+	return c.WaitForJobCompletion(resp.UUID)
 }

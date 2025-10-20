@@ -19,6 +19,7 @@ const jobEndpoint = "/v1/search/live"
 type Client struct {
 	BaseURL string
 	Token   string
+	Timeout time.Duration
 }
 
 // NewClient creates a new API client
@@ -26,6 +27,7 @@ func NewClient(baseURL string, token string) *Client {
 	return &Client{
 		BaseURL: baseURL,
 		Token:   token,
+		Timeout: 60 * time.Second, // Default timeout
 	}
 }
 
@@ -39,6 +41,7 @@ func NewClientFromConfig() (*Client, error) {
 	return &Client{
 		BaseURL: cfg.BaseUrl,
 		Token:   cfg.Token,
+		Timeout: cfg.Timeout,
 	}, nil
 }
 
@@ -76,7 +79,9 @@ func (c *Client) doRequest(url string, requestBody []byte) (*types.ResultRespons
 		req.Header.Set("Authorization", "Bearer "+c.Token)
 	}
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: c.Timeout,
+	}
 	resp, err := client.Do(req)
 
 	if err != nil {
@@ -112,7 +117,9 @@ func (c *Client) doStatusRequest(url string) (*types.IndexerJobResult, error) {
 		req.Header.Set("Authorization", "Bearer "+c.Token)
 	}
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: c.Timeout,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to do GET request to %s: %w", url, err)
@@ -146,7 +153,9 @@ func (c *Client) doResultRequest(url string, receiver any) error {
 		req.Header.Set("Authorization", "Bearer "+c.Token)
 	}
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: c.Timeout,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to do GET request to %s: %w", url, err)
@@ -180,7 +189,9 @@ func (c *Client) doImmediateRequest(url string, requestBody []byte, receiver any
 		req.Header.Set("Authorization", "Bearer "+c.Token)
 	}
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: c.Timeout,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to do POST request to %s: %w", url, err)
@@ -216,11 +227,11 @@ func (c *Client) GetResult(jobID string, receiver any) error {
 }
 
 // WaitForJobCompletion polls the job status until completion and returns the results
-func (c *Client) WaitForJobCompletion(jobID string, timeout time.Duration) ([]types.Document, error) {
+func (c *Client) WaitForJobCompletion(jobID string) ([]types.Document, error) {
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
-	timeoutTimer := time.NewTimer(timeout)
+	timeoutTimer := time.NewTimer(c.Timeout)
 	defer timeoutTimer.Stop()
 
 	for {
@@ -247,17 +258,7 @@ func (c *Client) WaitForJobCompletion(jobID string, timeout time.Duration) ([]ty
 			}
 
 		case <-timeoutTimer.C:
-			return nil, fmt.Errorf("job %s timed out after %v", jobID, timeout)
+			return nil, fmt.Errorf("job %s timed out after %v", jobID, c.Timeout)
 		}
 	}
-}
-
-// WaitForJobCompletionWithDefaultTimeout polls the job status until completion using the default timeout from config
-func (c *Client) WaitForJobCompletionWithDefaultTimeout(jobID string) ([]types.Document, error) {
-	cfg, err := config.LoadConfig()
-	if err != nil {
-		// Fallback to 60 seconds if config can't be loaded
-		return c.WaitForJobCompletion(jobID, 60*time.Second)
-	}
-	return c.WaitForJobCompletion(jobID, cfg.Timeout)
 }

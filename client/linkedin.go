@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/masa-finance/tee-worker/api/args/linkedin/profile"
 	"github.com/masa-finance/tee-worker/api/jobs"
@@ -37,7 +36,7 @@ func (c *Client) PerformLinkedInSearch(query string, mode ptypes.ScraperMode) (*
 }
 
 // PerformLinkedInSearchAndWait performs a LinkedIn search and waits for completion
-func (c *Client) PerformLinkedInSearchAndWait(query string, mode ptypes.ScraperMode, timeout time.Duration) ([]types.Document, error) {
+func (c *Client) PerformLinkedInSearchAndWait(query string, mode ptypes.ScraperMode) ([]types.Document, error) {
 	resp, err := c.PerformLinkedInSearch(query, mode)
 	if err != nil {
 		return nil, err
@@ -45,11 +44,11 @@ func (c *Client) PerformLinkedInSearchAndWait(query string, mode ptypes.ScraperM
 	if resp.Error != "" {
 		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
 	}
-	return c.WaitForJobCompletion(resp.UUID, timeout)
+	return c.WaitForJobCompletion(resp.UUID)
 }
 
 // PostLinkedInJobAndWait posts a LinkedIn job and waits for completion
-func (c *Client) PostLinkedInJobAndWait(args profile.Arguments, timeout time.Duration) ([]types.Document, error) {
+func (c *Client) PostLinkedInJobAndWait(args profile.Arguments) ([]types.Document, error) {
 	resp, err := c.PostLinkedInJob(args)
 	if err != nil {
 		return nil, err
@@ -57,5 +56,5 @@ func (c *Client) PostLinkedInJobAndWait(args profile.Arguments, timeout time.Dur
 	if resp.Error != "" {
 		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
 	}
-	return c.WaitForJobCompletion(resp.UUID, timeout)
+	return c.WaitForJobCompletion(resp.UUID)
 }
