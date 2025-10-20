@@ -178,6 +178,42 @@ func (c *Client) doResultRequest(url string, receiver any) error {
 	return getErrorFromResponse(body)
 }
 
+// doMetricsRequest sends a GET request to the metrics endpoint
+func (c *Client) doMetricsRequest(url string, receiver any) error {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create GET request to %s: %w", url, err)
+	}
+
+	if c.Token != "" {
+		req.Header.Set("Authorization", "Bearer "+c.Token)
+	}
+
+	client := &http.Client{
+		Timeout: c.Timeout,
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to do GET request to %s: %w", url, err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read body from GET request to %s: %w", url, err)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("job errored: Status code %d during call to %s. Response body: %s", resp.StatusCode, url, body)
+	}
+
+	if err := json.Unmarshal(body, receiver); err != nil {
+		return fmt.Errorf("Error during unmarshal: %#w. URL: %s. Response: '%s'", err, url, body)
+	}
+
+	return getErrorFromResponse(body)
+}
+
 func (c *Client) doImmediateRequest(url string, requestBody []byte, receiver any) error {
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(requestBody))
 	if err != nil {
