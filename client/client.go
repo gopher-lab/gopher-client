@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/gopher-lab/gopher-client/config"
 	"github.com/masa-finance/tee-worker/api/types"
@@ -212,4 +213,51 @@ func (c *Client) GetJobStatus(jobID string) (*types.IndexerJobResult, error) {
 func (c *Client) GetResult(jobID string, receiver any) error {
 	url := c.BaseURL + jobEndpoint + "/result/" + jobID
 	return c.doResultRequest(url, receiver)
+}
+
+// WaitForJobCompletion polls the job status until completion and returns the results
+func (c *Client) WaitForJobCompletion(jobID string, timeout time.Duration) ([]types.Document, error) {
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
+
+	timeoutTimer := time.NewTimer(timeout)
+	defer timeoutTimer.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			status, err := c.GetJobStatus(jobID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get job status: %w", err)
+			}
+
+			// Check if job is done (either "done" or "done(not saved)")
+			if status.Status.IsDone() {
+				var results []types.Document
+				err = c.GetResult(jobID, &results)
+				if err != nil {
+					return nil, fmt.Errorf("failed to get job results: %w", err)
+				}
+				return results, nil
+			}
+
+			// Check for errors
+			if status.Status == types.JobStatusError || status.Status == types.JobStatusRetryError {
+				return nil, fmt.Errorf("job failed with status %s: %s", status.Status, status.Error)
+			}
+
+		case <-timeoutTimer.C:
+			return nil, fmt.Errorf("job %s timed out after %v", jobID, timeout)
+		}
+	}
+}
+
+// WaitForJobCompletionWithDefaultTimeout polls the job status until completion using the default timeout from config
+func (c *Client) WaitForJobCompletionWithDefaultTimeout(jobID string) ([]types.Document, error) {
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		// Fallback to 60 seconds if config can't be loaded
+		return c.WaitForJobCompletion(jobID, 60*time.Second)
+	}
+	return c.WaitForJobCompletion(jobID, cfg.Timeout)
 }

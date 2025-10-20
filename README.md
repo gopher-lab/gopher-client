@@ -35,7 +35,7 @@ func main() {
         log.Fatal(err)
     }
     
-    fmt.Printf("Job ID: %s\n", result.JobID)
+    fmt.Printf("Job ID: %s\n", result.Res)
 }
 ```
 
@@ -61,7 +61,7 @@ func main() {
         log.Fatal(err)
     }
     
-    fmt.Printf("Job ID: %s\n", result.JobID)
+    fmt.Printf("Job ID: %s\n", result.Res)
 }
 ```
 
@@ -74,6 +74,7 @@ The client can be configured using environment variables or by passing parameter
 ```bash
 export GOPHER_CLIENT_URL="https://data.gopher-ai.com"
 export GOPHER_CLIENT_TOKEN="your-api-token"
+export GOPHER_CLIENT_TIMEOUT="60s"  # Optional: default is 60s
 ```
 
 ### Programmatic Configuration
@@ -140,6 +141,109 @@ client := client.MustNewClientFromConfig()
 #### Job Management
 - `GetJobStatus(jobID string) (*types.IndexerJobResult, error)` - Get the status of a job
 - `GetResult(jobID string, receiver any) error` - Get the result of a completed job
+- `WaitForJobCompletion(jobID string, timeout time.Duration) ([]types.Document, error)` - Poll job until completion
+- `WaitForJobCompletionWithDefaultTimeout(jobID string) ([]types.Document, error)` - Poll with config timeout
+
+### Polling Wrapper Methods
+
+The client provides convenient wrapper methods that combine job submission with automatic polling, eliminating the need for manual status checking:
+
+#### Generic Polling
+```go
+import "time"
+
+// Poll with explicit timeout
+results, err := client.WaitForJobCompletion(jobID, 2*time.Minute)
+
+// Poll with config timeout (uses GOPHER_CLIENT_TIMEOUT or 60s default)
+results, err := client.WaitForJobCompletionWithDefaultTimeout(jobID)
+```
+
+#### Web Search with Polling
+```go
+// Web search and wait for results
+results, err := client.PerformWebSearchAndWait("https://example.com", 2*time.Minute)
+
+// Advanced web job with polling
+args := page.NewArguments()
+args.URL = "https://example.com"
+args.MaxDepth = 2
+results, err := client.PostWebJobAndWait(args, 3*time.Minute)
+```
+
+#### Social Media Search with Polling
+
+**Twitter:**
+```go
+// Twitter search and wait
+results, err := client.PerformTwitterSearchAndWait("golang programming", 2*time.Minute)
+
+// Advanced Twitter job with polling
+args := search.NewArguments()
+args.Query = "golang programming"
+args.Type = types.CapSearchByQuery
+results, err := client.PostTwitterJobAndWait(args, 2*time.Minute)
+```
+
+**Reddit:**
+```go
+// Reddit search and wait
+results, err := client.PerformRedditSearchPostsAndWait("golang", 10, 2*time.Minute)
+results, err := client.PerformRedditSearchUsersAndWait("username", 5, 2*time.Minute)
+results, err := client.PerformRedditScrapeURLAndWait("https://reddit.com/r/golang", 10, 2*time.Minute)
+
+// Advanced Reddit job with polling
+args := search.NewSearchPostsArguments()
+args.Queries = []string{"golang", "programming"}
+args.MaxItems = 10
+results, err := client.PostRedditJobAndWait(args, 2*time.Minute)
+```
+
+**LinkedIn:**
+```go
+import ptypes "github.com/masa-finance/tee-worker/api/types/linkedin/profile"
+
+// LinkedIn search and wait
+results, err := client.PerformLinkedInSearchAndWait("software engineer", ptypes.ScraperModeShort, 2*time.Minute)
+
+// Advanced LinkedIn job with polling
+args := profile.NewArguments()
+args.ScraperMode = ptypes.ScraperModeFull
+args.Query = "software engineer"
+results, err := client.PostLinkedInJobAndWait(args, 2*time.Minute)
+```
+
+**TikTok:**
+```go
+// TikTok search and wait
+results, err := client.PerformTikTokSearchAndWait("golang tutorial", 10, 2*time.Minute)
+results, err := client.PerformTikTokSearchByTrendingAndWait("views", 20, 2*time.Minute)
+
+// TikTok transcription and wait
+results, err := client.PerformTikTokTranscriptionAndWait("https://tiktok.com/@user/video/123", 3*time.Minute)
+```
+
+#### Timeout Configuration
+
+The polling methods respect the `GOPHER_CLIENT_TIMEOUT` environment variable:
+
+```bash
+# Set timeout to 5 minutes
+export GOPHER_CLIENT_TIMEOUT="5m"
+
+# Set timeout to 2 minutes
+export GOPHER_CLIENT_TIMEOUT="2m"
+
+# Set timeout to 30 seconds
+export GOPHER_CLIENT_TIMEOUT="30s"
+```
+
+All `*AndWait` methods will:
+- Submit the job
+- Automatically poll for completion every second
+- Return results when job is done (status: "done" or "done(not saved)")
+- Return an error if the job fails or times out
+- Use the configured timeout or the explicit timeout parameter
 
 ### AI Analysis
 
@@ -428,7 +532,7 @@ stats, err := client.GetMetrics("web", true) // true = refresh cache
 
 ### Job Response
 Most search methods return a `*types.ResultResponse` containing:
-- `JobID` - Unique identifier for the job
+- `Res` - Unique identifier for the job
 - `Status` - Current job status
 - Other job metadata
 
@@ -478,7 +582,35 @@ client := client.NewClient("https://data.gopher-ai.com", "")
 
 ## Examples
 
-### Complete Web Search Example
+### Complete Web Search Example (with Polling)
+```go
+package main
+
+import (
+    "fmt"
+    "log"
+    "time"
+    
+    "github.com/gopher-lab/gopher-client/client"
+)
+
+func main() {
+    c := client.NewClient("https://data.gopher-ai.com", "your-token")
+    
+    // Web search with automatic polling - much simpler!
+    results, err := c.PerformWebSearchAndWait("https://example.com", 2*time.Minute)
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Printf("Found %d results\n", len(results))
+    for i, result := range results {
+        fmt.Printf("%d. %s\n", i+1, result.Content)
+    }
+}
+```
+
+### Manual Polling Example (for reference)
 ```go
 package main
 
@@ -500,20 +632,20 @@ func main() {
         log.Fatal(err)
     }
     
-    fmt.Printf("Job started: %s\n", result.JobID)
+    fmt.Printf("Job started: %s\n", result.UUID)
     
-    // Poll for completion
+    // Poll for completion manually
     for {
-        status, err := c.GetJobStatus(result.JobID)
+        status, err := c.GetJobStatus(result.UUID)
         if err != nil {
             log.Fatal(err)
         }
         
         fmt.Printf("Status: %s\n", status.Status)
         
-        if status.Status == "COMPLETED" {
+        if status.Status.IsDone() {
             break
-        } else if status.Status == "FAILED" {
+        } else if status.Status == types.JobStatusError {
             log.Fatal("Job failed")
         }
         
@@ -521,13 +653,68 @@ func main() {
     }
     
     // Get results
-    var searchResults []types.SearchResult
-    err = c.GetResult(result.JobID, &searchResults)
+    var searchResults []types.Document
+    err = c.GetResult(result.UUID, &searchResults)
     if err != nil {
         log.Fatal(err)
     }
     
     fmt.Printf("Found %d results\n", len(searchResults))
+}
+```
+
+### Multi-Platform Search with Polling
+```go
+package main
+
+import (
+    "fmt"
+    "log"
+    "time"
+    
+    "github.com/gopher-lab/gopher-client/client"
+    ptypes "github.com/masa-finance/tee-worker/api/types/linkedin/profile"
+)
+
+func main() {
+    c := client.NewClient("https://data.gopher-ai.com", "your-token")
+    
+    // Search multiple platforms with automatic polling
+    fmt.Println("Searching web...")
+    webResults, err := c.PerformWebSearchAndWait("https://golang.org/doc", 2*time.Minute)
+    if err != nil {
+        log.Printf("Web search failed: %v", err)
+    } else {
+        fmt.Printf("Found %d web results\n", len(webResults))
+    }
+    
+    fmt.Println("Searching Twitter...")
+    twitterResults, err := c.PerformTwitterSearchAndWait("golang programming", 2*time.Minute)
+    if err != nil {
+        log.Printf("Twitter search failed: %v", err)
+    } else {
+        fmt.Printf("Found %d Twitter results\n", len(twitterResults))
+    }
+    
+    fmt.Println("Searching Reddit...")
+    redditResults, err := c.PerformRedditSearchPostsAndWait("golang", 10, 2*time.Minute)
+    if err != nil {
+        log.Printf("Reddit search failed: %v", err)
+    } else {
+        fmt.Printf("Found %d Reddit results\n", len(redditResults))
+    }
+    
+    fmt.Println("Searching LinkedIn...")
+    linkedinResults, err := c.PerformLinkedInSearchAndWait("golang developer", ptypes.ScraperModeShort, 2*time.Minute)
+    if err != nil {
+        log.Printf("LinkedIn search failed: %v", err)
+    } else {
+        fmt.Printf("Found %d LinkedIn results\n", len(linkedinResults))
+    }
+    
+    // Process all results
+    totalResults := len(webResults) + len(twitterResults) + len(redditResults) + len(linkedinResults)
+    fmt.Printf("Total results across all platforms: %d\n", totalResults)
 }
 ```
 
@@ -554,7 +741,7 @@ func main() {
     }
     
     // Perform similarity search
-    var results []types.SearchResult
+    var results []types.Document
     err := c.PerformSimilaritySearch(
         "golang best practices",
         sources,
@@ -570,7 +757,7 @@ func main() {
     
     fmt.Printf("Found %d similar results\n", len(results))
     for i, result := range results {
-        fmt.Printf("%d. %s\n", i+1, result.Title)
+        fmt.Printf("%d. %s\n", i+1, result.Content)
     }
 }
 ```

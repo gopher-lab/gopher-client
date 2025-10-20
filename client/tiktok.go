@@ -2,6 +2,8 @@ package client
 
 import (
 	"encoding/json"
+	"fmt"
+	"time"
 
 	"github.com/masa-finance/tee-worker/api/args/tiktok/query"
 	"github.com/masa-finance/tee-worker/api/args/tiktok/transcription"
@@ -64,4 +66,40 @@ func (c *Client) PerformTikTokSearchByTrending(sortBy string, maxItems int) (*ty
 		return nil, err
 	}
 	return c.doRequest(c.BaseURL+jobEndpoint, body)
+}
+
+// PerformTikTokTranscriptionAndWait performs a TikTok transcription and waits for completion
+func (c *Client) PerformTikTokTranscriptionAndWait(url string, timeout time.Duration) ([]types.Document, error) {
+	resp, err := c.PerformTikTokTranscription(url)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != "" {
+		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
+	}
+	return c.WaitForJobCompletion(resp.UUID, timeout)
+}
+
+// PerformTikTokSearchAndWait performs a TikTok search and waits for completion
+func (c *Client) PerformTikTokSearchAndWait(q string, maxItems uint, timeout time.Duration) ([]types.Document, error) {
+	resp, err := c.PerformTikTokSearch(q, maxItems)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != "" {
+		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
+	}
+	return c.WaitForJobCompletion(resp.UUID, timeout)
+}
+
+// PerformTikTokSearchByTrendingAndWait performs a TikTok trending search and waits for completion
+func (c *Client) PerformTikTokSearchByTrendingAndWait(sortBy string, maxItems int, timeout time.Duration) ([]types.Document, error) {
+	resp, err := c.PerformTikTokSearchByTrending(sortBy, maxItems)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != "" {
+		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
+	}
+	return c.WaitForJobCompletion(resp.UUID, timeout)
 }

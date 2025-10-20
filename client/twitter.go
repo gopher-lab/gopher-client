@@ -2,6 +2,8 @@ package client
 
 import (
 	"encoding/json"
+	"fmt"
+	"time"
 
 	"github.com/masa-finance/tee-worker/api/args/twitter/search"
 	"github.com/masa-finance/tee-worker/api/jobs"
@@ -29,4 +31,28 @@ func (c *Client) PerformTwitterSearch(query string) (*types.ResultResponse, erro
 		return nil, err
 	}
 	return res, nil
+}
+
+// PerformTwitterSearchAndWait performs a Twitter search and waits for completion
+func (c *Client) PerformTwitterSearchAndWait(query string, timeout time.Duration) ([]types.Document, error) {
+	resp, err := c.PerformTwitterSearch(query)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != "" {
+		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
+	}
+	return c.WaitForJobCompletion(resp.UUID, timeout)
+}
+
+// PostTwitterJobAndWait posts a Twitter job and waits for completion
+func (c *Client) PostTwitterJobAndWait(args search.Arguments, timeout time.Duration) ([]types.Document, error) {
+	resp, err := c.PostTwitterJob(args)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != "" {
+		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
+	}
+	return c.WaitForJobCompletion(resp.UUID, timeout)
 }

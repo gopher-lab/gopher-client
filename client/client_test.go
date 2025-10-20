@@ -2,6 +2,7 @@ package client
 
 import (
 	"os"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -200,6 +201,39 @@ var _ = Describe("Client", func() {
 				Expect(err.Error()).To(ContainSubstring("failed to do GET request"))
 				// The error should contain the constructed URL
 				Expect(err.Error()).To(ContainSubstring(expectedURL))
+			})
+		})
+
+		Context("WaitForJobCompletion", func() {
+			It("should timeout when job doesn't complete", func() {
+				jobID := "test-job-timeout"
+				timeout := 100 * time.Millisecond
+
+				// This should timeout quickly since we're using an invalid URL
+				_, err := client.WaitForJobCompletion(jobID, timeout)
+
+				Expect(err).NotTo(BeNil())
+				Expect(err.Error()).To(ContainSubstring("timed out after"))
+			})
+		})
+
+		Context("WaitForJobCompletionWithDefaultTimeout", func() {
+			BeforeEach(func() {
+				os.Setenv("GOPHER_CLIENT_TIMEOUT", "500ms")
+			})
+
+			AfterEach(func() {
+				os.Unsetenv("GOPHER_CLIENT_TIMEOUT")
+			})
+
+			It("should use default timeout from config", func() {
+				jobID := "test-job-default-timeout"
+
+				// This should timeout quickly since we're using an invalid URL
+				_, err := client.WaitForJobCompletionWithDefaultTimeout(jobID)
+
+				Expect(err).NotTo(BeNil())
+				Expect(err.Error()).To(ContainSubstring("timed out after"))
 			})
 		})
 	})
