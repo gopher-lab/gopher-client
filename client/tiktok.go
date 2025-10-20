@@ -103,3 +103,72 @@ func (c *Client) PerformTikTokSearchByTrendingAndWait(sortBy string, maxItems in
 	}
 	return c.WaitForJobCompletion(resp.UUID, timeout)
 }
+
+// PostTikTokJobAndWait posts a TikTok job and waits for completion
+func (c *Client) PostTikTokJobAndWait(args map[string]any, timeout time.Duration) ([]types.Document, error) {
+	resp, err := c.PostTikTokJob(args)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != "" {
+		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
+	}
+	return c.WaitForJobCompletion(resp.UUID, timeout)
+}
+
+// PostTikTokSearchJobAndWait posts a TikTok search job with flexible arguments and waits for completion
+func (c *Client) PostTikTokSearchJobAndWait(args query.Arguments, timeout time.Duration) ([]types.Document, error) {
+	body, err := json.Marshal(jobs.TikTokSearchParams{
+		JobType: types.TiktokJob,
+		Args:    args,
+	})
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.doRequest(c.BaseURL+jobEndpoint, body)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != "" {
+		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
+	}
+	return c.WaitForJobCompletion(resp.UUID, timeout)
+}
+
+// PostTikTokTrendingJobAndWait posts a TikTok trending job with flexible arguments and waits for completion
+func (c *Client) PostTikTokTrendingJobAndWait(args trending.Arguments, timeout time.Duration) ([]types.Document, error) {
+	body, err := json.Marshal(jobs.TikTokTrendingParams{
+		JobType: types.TiktokJob,
+		Args:    args,
+	})
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.doRequest(c.BaseURL+jobEndpoint, body)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != "" {
+		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
+	}
+	return c.WaitForJobCompletion(resp.UUID, timeout)
+}
+
+// PostTikTokTranscriptionJobAndWait posts a TikTok transcription job with flexible arguments and waits for completion
+func (c *Client) PostTikTokTranscriptionJobAndWait(args transcription.Arguments, timeout time.Duration) ([]types.Document, error) {
+	body, err := json.Marshal(jobs.TikTokTranscriptionParams{
+		JobType: types.TiktokJob,
+		Args:    args,
+	})
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.doRequest(c.BaseURL+jobEndpoint, body)
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error != "" {
+		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
+	}
+	return c.WaitForJobCompletion(resp.UUID, timeout)
+}
