@@ -17,7 +17,7 @@ The client can be configured using environment variables or by passing parameter
 ```bash
 export GOPHER_CLIENT_TOKEN="your-api-token"
 export GOPHER_CLIENT_TIMEOUT="120s"  # Optional: default is 60s
-export GOPHER_CLIENT_URL="https://data.gopher-ai.com" # Optional: default is present
+export GOPHER_CLIENT_URL="https://data.gopher-ai.com/api" # Optional: default is present
 ```
 
 **Note:** The `GOPHER_CLIENT_TIMEOUT` environment variable automatically configures timeouts for all `AndWait` methods and HTTP requests.
@@ -65,7 +65,7 @@ import (
 
 func main() {
     // Create a new client with explicit configuration
-    c := client.NewClient("https://data.gopher-ai.com", "your-api-token")
+    c := client.NewClient("https://data.gopher-ai.com/api", "your-api-token")
     
     // Perform a web search
     result, err := c.PerformWebSearch("https://example.com")
