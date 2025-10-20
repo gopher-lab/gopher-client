@@ -10,6 +10,18 @@ go get github.com/gopher-lab/gopher-client
 
 ## Quick Start
 
+## Configuration
+
+The client can be configured using environment variables or by passing parameters directly:
+
+### Environment Variables
+
+```bash
+export GOPHER_CLIENT_TOKEN="your-api-token"
+export GOPHER_CLIENT_TIMEOUT="120s"  # Optional: default is 60s
+export GOPHER_CLIENT_URL="https://data.gopher-ai.com" # Optional: default is present
+```
+
 ### Using Environment Variables (Recommended)
 ```go
 package main
@@ -63,18 +75,6 @@ func main() {
     
     fmt.Printf("Job ID: %s\n", result.Res)
 }
-```
-
-## Configuration
-
-The client can be configured using environment variables or by passing parameters directly:
-
-### Environment Variables
-
-```bash
-export GOPHER_CLIENT_URL="https://data.gopher-ai.com"
-export GOPHER_CLIENT_TOKEN="your-api-token"
-export GOPHER_CLIENT_TIMEOUT="60s"  # Optional: default is 60s
 ```
 
 ### Programmatic Configuration
