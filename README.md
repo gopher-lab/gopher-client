@@ -159,7 +159,7 @@ results, err := client.PerformTikTokSearchByTrendingAndWait("views", 20)
 results, err := client.PerformTikTokTranscriptionAndWait("https://tiktok.com/@user/video/123")
 ```
 
-### 🔍 Advanced Search
+### 🔍 Similarity Search
 ```go
 import "github.com/masa-finance/tee-worker/api/types"
 
