@@ -3,7 +3,7 @@ package client
 import (
 	"encoding/json"
 
-	"github.com/masa-finance/gopher-client/log"
+	"github.com/gopher-lab/gopher-client/log"
 	"github.com/masa-finance/tee-worker/api/jobs"
 	"github.com/masa-finance/tee-worker/api/types"
 )

@@ -3,9 +3,9 @@ package config
 import (
 	"log"
 
+	"github.com/gopher-lab/gopher-client/types"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
-	"github.com/masa-finance/gopher-client/types"
 )
 
 // LoadConfig loads the Config from environment variables.

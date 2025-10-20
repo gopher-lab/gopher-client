@@ -3,8 +3,8 @@ package config_test
 import (
 	"os"
 
-	"github.com/masa-finance/gopher-client/config"
-	"github.com/masa-finance/gopher-client/types"
+	"github.com/gopher-lab/gopher-client/config"
+	"github.com/gopher-lab/gopher-client/types"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

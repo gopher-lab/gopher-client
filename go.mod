@@ -1,4 +1,4 @@
-module github.com/masa-finance/gopher-client
+module github.com/gopher-lab/gopher-client
 
 go 1.24.6
 
