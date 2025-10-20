@@ -78,7 +78,7 @@ func (c *Client) doRequest(url string, requestBody []byte) (*types.ResultRespons
 	return &searchResponse, getErrorFromResponse(body)
 }
 
-func (c *Client) doStatusRequest(url string) (*types.JobResult, error) {
+func (c *Client) doStatusRequest(url string) (*types.IndexerJobResult, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create GET request to %s: %w", url, err)
@@ -104,7 +104,7 @@ func (c *Client) doStatusRequest(url string) (*types.JobResult, error) {
 		return nil, fmt.Errorf("job errored: Status code %d during call to %s. Response body: %s", resp.StatusCode, url, body)
 	}
 
-	var jobStatusResponse types.JobResult
+	var jobStatusResponse types.IndexerJobResult
 	if err := json.Unmarshal(body, &jobStatusResponse); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal GET %s response %s: %w", url, body, err)
 	}
@@ -180,7 +180,7 @@ func (c *Client) doImmediateRequest(url string, requestBody []byte, receiver any
 }
 
 // GetJobStatus sends a GET request to the job status endpoint
-func (c *Client) GetJobStatus(jobID string) (*types.JobResult, error) {
+func (c *Client) GetJobStatus(jobID string) (*types.IndexerJobResult, error) {
 	url := c.BaseURL + jobEndpoint + "/status/" + jobID
 	return c.doStatusRequest(url)
 }
