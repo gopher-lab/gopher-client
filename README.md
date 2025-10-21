@@ -44,12 +44,12 @@ func main() {
     }
     
     // Scrape a web page (async)
-    result, err := c.ScrapeWebAsync("https://example.com")
+    job, err := c.ScrapeWebAsync("https://example.com")
     if err != nil {
         log.Fatal(err)
     }
     
-    fmt.Printf("Job ID: %s\n", result.UUID)
+    fmt.Printf("Job ID: %s\n", job.UUID)
 }
 ```
 
@@ -82,8 +82,8 @@ func main() {
 ### 🌐 Web Scraping
 ```go
 // Submit job (async)
-result, err := client.ScrapeWebAsync("https://example.com")
-fmt.Printf("Job ID: %s\n", result.UUID)
+job, err := client.ScrapeWebAsync("https://example.com")
+fmt.Printf("Job ID: %s\n", job.UUID)
 
 // Get results directly (sync)
 results, err := client.ScrapeWeb("https://example.com")
@@ -92,8 +92,8 @@ results, err := client.ScrapeWeb("https://example.com")
 ### 🐦 Twitter Search
 ```go
 // Submit job (async)
-result, err := client.SearchTwitterAsync("golang programming")
-fmt.Printf("Job ID: %s\n", result.UUID)
+job, err := client.SearchTwitterAsync("golang programming")
+fmt.Printf("Job ID: %s\n", job.UUID)
 
 // Get results directly (sync)
 results, err := client.SearchTwitter("golang programming")
@@ -102,8 +102,8 @@ results, err := client.SearchTwitter("golang programming")
 ### 👽 Reddit Operations
 ```go
 // Scrape Reddit URL (async)
-result, err := client.ScrapeRedditURLAsync("https://reddit.com/r/golang", 10)
-fmt.Printf("Job ID: %s\n", result.UUID)
+job, err := client.ScrapeRedditURLAsync("https://reddit.com/r/golang", 10)
+fmt.Printf("Job ID: %s\n", job.UUID)
 
 // Scrape Reddit URL (sync)
 results, err := client.ScrapeRedditURL("https://reddit.com/r/golang", 10)
@@ -120,22 +120,40 @@ results, err := client.SearchRedditCommunities("golang", 10)
 
 ### 💼 LinkedIn Search
 ```go
-import ptypes "github.com/masa-finance/tee-worker/api/types/linkedin/profile"
-
 // Submit job (async)
-result, err := client.SearchLinkedInAsync("software engineer", ptypes.ScraperModeShort)
-fmt.Printf("Job ID: %s\n", result.UUID)
+job, err := client.SearchLinkedInAsync("software engineer")
+fmt.Printf("Job ID: %s\n", job.UUID)
 
 // Get results directly (sync)
-results, err := client.SearchLinkedIn("software engineer", ptypes.ScraperModeShort)
+results, err := client.SearchLinkedIn("software engineer")
+
+// Advanced: Use custom arguments for scraper mode
+import ptypes "github.com/masa-finance/tee-worker/api/types/linkedin/profile"
+import "github.com/masa-finance/tee-worker/api/args/linkedin/profile"
+
+args := profile.NewArguments()
+args.Query = "software engineer"
+args.ScraperMode = ptypes.ScraperModeShort
+
+// Submit with custom args (async)
+job, err := client.SearchLinkedInWithArgsAsync(args)
+fmt.Printf("Job ID: %s\n", job.UUID)
+
+// Get results with custom args (sync)
+results, err := client.SearchLinkedInWithArgs(args)
 ```
 
 ### 🎵 TikTok Operations
 ```go
 // Submit jobs (async)
-result, err := client.SearchTikTokAsync("golang tutorial", 10)
-result, err := client.SearchTikTokTrendingAsync("views", 20)
-result, err := client.TranscribeTikTokAsync("https://tiktok.com/@user/video/123")
+job, err := client.SearchTikTokAsync("golang tutorial", 10)
+fmt.Printf("Job ID: %s\n", job.UUID)
+
+job, err := client.SearchTikTokTrendingAsync("views", 20)
+fmt.Printf("Job ID: %s\n", job.UUID)
+
+job, err := client.TranscribeTikTokAsync("https://tiktok.com/@user/video/123")
+fmt.Printf("Job ID: %s\n", job.UUID)
 
 // Get results directly (sync)
 results, err := client.SearchTikTok("golang tutorial", 10)

@@ -7,7 +7,6 @@ import (
 	"github.com/masa-finance/tee-worker/api/args/linkedin/profile"
 	"github.com/masa-finance/tee-worker/api/jobs"
 	"github.com/masa-finance/tee-worker/api/types"
-	ptypes "github.com/masa-finance/tee-worker/api/types/linkedin/profile"
 )
 
 // SearchLinkedInWithArgsAsync searches LinkedIn with custom arguments and returns a job ID
@@ -23,9 +22,8 @@ func (c *Client) SearchLinkedInWithArgsAsync(args profile.Arguments) (*types.Res
 }
 
 // SearchLinkedInAsync performs a LinkedIn search job and returns a job ID
-func (c *Client) SearchLinkedInAsync(query string, mode ptypes.ScraperMode) (*types.ResultResponse, error) {
+func (c *Client) SearchLinkedInAsync(query string) (*types.ResultResponse, error) {
 	args := profile.NewArguments()
-	args.ScraperMode = mode
 	args.Query = query
 
 	res, err := c.SearchLinkedInWithArgsAsync(args)
@@ -36,8 +34,8 @@ func (c *Client) SearchLinkedInAsync(query string, mode ptypes.ScraperMode) (*ty
 }
 
 // SearchLinkedIn performs a LinkedIn search and waits for completion, returning results directly
-func (c *Client) SearchLinkedIn(query string, mode ptypes.ScraperMode) ([]types.Document, error) {
-	resp, err := c.SearchLinkedInAsync(query, mode)
+func (c *Client) SearchLinkedIn(query string) ([]types.Document, error) {
+	resp, err := c.SearchLinkedInAsync(query)
 	if err != nil {
 		return nil, err
 	}
