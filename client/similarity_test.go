@@ -18,7 +18,7 @@ var _ = Describe("Similarity Client", func() {
 		}
 	})
 
-	Describe("PerformSimilaritySearch", func() {
+	Describe("SearchSimilarity", func() {
 		Context("with valid input", func() {
 			It("should perform similarity search successfully", func() {
 				query := "artificial intelligence"
@@ -27,7 +27,7 @@ var _ = Describe("Similarity Client", func() {
 				operator := "and"
 				maxResults := 10
 
-				results, err := client.PerformSimilaritySearch(query, sources, keywords, operator, maxResults)
+				results, err := client.SearchSimilarity(query, sources, keywords, operator, maxResults)
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(results).NotTo(BeNil())
@@ -44,7 +44,7 @@ var _ = Describe("Similarity Client", func() {
 				operator := "and"
 				maxResults := 5
 
-				results, err := client.PerformSimilaritySearch(query, sources, keywords, operator, maxResults)
+				results, err := client.SearchSimilarity(query, sources, keywords, operator, maxResults)
 
 				// The API might return an error for empty query, which is expected
 				if err != nil {

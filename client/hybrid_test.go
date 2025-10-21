@@ -18,7 +18,7 @@ var _ = Describe("Hybrid Client", func() {
 		}
 	})
 
-	Describe("PerformHybridSearch", func() {
+	Describe("SearchHybrid", func() {
 		Context("with valid input", func() {
 			It("should perform hybrid search successfully", func() {
 				query := "machine learning"
@@ -30,7 +30,7 @@ var _ = Describe("Hybrid Client", func() {
 				operator := "or"
 				maxResults := 10
 
-				results, err := client.PerformHybridSearch(query, sources, text, queryWeight, textWeight, keywords, operator, maxResults)
+				results, err := client.SearchHybrid(query, sources, text, queryWeight, textWeight, keywords, operator, maxResults)
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(results).NotTo(BeNil())
@@ -50,7 +50,7 @@ var _ = Describe("Hybrid Client", func() {
 				operator := "and"
 				maxResults := 5
 
-				results, err := client.PerformHybridSearch(query, sources, text, queryWeight, textWeight, keywords, operator, maxResults)
+				results, err := client.SearchHybrid(query, sources, text, queryWeight, textWeight, keywords, operator, maxResults)
 
 				// The API might return an error for empty query, which is expected
 				if err != nil {

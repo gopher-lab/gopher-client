@@ -11,8 +11,8 @@ import (
 	"github.com/masa-finance/tee-worker/api/types"
 )
 
-// PostTikTokJob posts a TikTok job to the API
-func (c *Client) PostTikTokJob(args map[string]any) (*types.ResultResponse, error) {
+// SearchTikTokWithArgsAsync searches TikTok with custom arguments and returns a job ID
+func (c *Client) SearchTikTokWithArgsAsync(args map[string]any) (*types.ResultResponse, error) {
 	body, err := json.Marshal(jobs.TikTokParams{
 		JobType: types.TiktokJob,
 		Args:    args,
@@ -23,7 +23,8 @@ func (c *Client) PostTikTokJob(args map[string]any) (*types.ResultResponse, erro
 	return c.doRequest(c.BaseURL+jobEndpoint, body)
 }
 
-func (c *Client) PerformTikTokTranscription(url string) (*types.ResultResponse, error) {
+// TranscribeTikTokAsync performs a TikTok transcription job and returns a job ID
+func (c *Client) TranscribeTikTokAsync(url string) (*types.ResultResponse, error) {
 	args := transcription.NewArguments()
 	args.VideoURL = url
 
@@ -37,7 +38,8 @@ func (c *Client) PerformTikTokTranscription(url string) (*types.ResultResponse, 
 	return c.doRequest(c.BaseURL+jobEndpoint, body)
 }
 
-func (c *Client) PerformTikTokSearch(q string, maxItems uint) (*types.ResultResponse, error) {
+// SearchTikTokAsync performs a TikTok search job and returns a job ID
+func (c *Client) SearchTikTokAsync(q string, maxItems uint) (*types.ResultResponse, error) {
 	args := query.NewArguments()
 	args.Search = []string{q}
 	args.MaxItems = maxItems
@@ -52,7 +54,8 @@ func (c *Client) PerformTikTokSearch(q string, maxItems uint) (*types.ResultResp
 	return c.doRequest(c.BaseURL+jobEndpoint, body)
 }
 
-func (c *Client) PerformTikTokSearchByTrending(sortBy string, maxItems int) (*types.ResultResponse, error) {
+// SearchTikTokTrendingAsync performs a TikTok trending search job and returns a job ID
+func (c *Client) SearchTikTokTrendingAsync(sortBy string, maxItems int) (*types.ResultResponse, error) {
 	args := trending.NewArguments()
 	args.SortBy = sortBy
 	args.MaxItems = maxItems
@@ -67,9 +70,9 @@ func (c *Client) PerformTikTokSearchByTrending(sortBy string, maxItems int) (*ty
 	return c.doRequest(c.BaseURL+jobEndpoint, body)
 }
 
-// PerformTikTokTranscriptionAndWait performs a TikTok transcription and waits for completion
-func (c *Client) PerformTikTokTranscriptionAndWait(url string) ([]types.Document, error) {
-	resp, err := c.PerformTikTokTranscription(url)
+// TranscribeTikTok performs a TikTok transcription and waits for completion, returning results directly
+func (c *Client) TranscribeTikTok(url string) ([]types.Document, error) {
+	resp, err := c.TranscribeTikTokAsync(url)
 	if err != nil {
 		return nil, err
 	}
@@ -79,9 +82,9 @@ func (c *Client) PerformTikTokTranscriptionAndWait(url string) ([]types.Document
 	return c.WaitForJobCompletion(resp.UUID)
 }
 
-// PerformTikTokSearchAndWait performs a TikTok search and waits for completion
-func (c *Client) PerformTikTokSearchAndWait(q string, maxItems uint) ([]types.Document, error) {
-	resp, err := c.PerformTikTokSearch(q, maxItems)
+// SearchTikTok performs a TikTok search and waits for completion, returning results directly
+func (c *Client) SearchTikTok(q string, maxItems uint) ([]types.Document, error) {
+	resp, err := c.SearchTikTokAsync(q, maxItems)
 	if err != nil {
 		return nil, err
 	}
@@ -91,9 +94,9 @@ func (c *Client) PerformTikTokSearchAndWait(q string, maxItems uint) ([]types.Do
 	return c.WaitForJobCompletion(resp.UUID)
 }
 
-// PerformTikTokSearchByTrendingAndWait performs a TikTok trending search and waits for completion
-func (c *Client) PerformTikTokSearchByTrendingAndWait(sortBy string, maxItems int) ([]types.Document, error) {
-	resp, err := c.PerformTikTokSearchByTrending(sortBy, maxItems)
+// SearchTikTokTrending performs a TikTok trending search and waits for completion, returning results directly
+func (c *Client) SearchTikTokTrending(sortBy string, maxItems int) ([]types.Document, error) {
+	resp, err := c.SearchTikTokTrendingAsync(sortBy, maxItems)
 	if err != nil {
 		return nil, err
 	}
@@ -103,9 +106,9 @@ func (c *Client) PerformTikTokSearchByTrendingAndWait(sortBy string, maxItems in
 	return c.WaitForJobCompletion(resp.UUID)
 }
 
-// PostTikTokJobAndWait posts a TikTok job and waits for completion
-func (c *Client) PostTikTokJobAndWait(args map[string]any) ([]types.Document, error) {
-	resp, err := c.PostTikTokJob(args)
+// SearchTikTokWithArgs searches TikTok with custom arguments and waits for completion, returning results directly
+func (c *Client) SearchTikTokWithArgs(args map[string]any) ([]types.Document, error) {
+	resp, err := c.SearchTikTokWithArgsAsync(args)
 	if err != nil {
 		return nil, err
 	}
@@ -115,8 +118,8 @@ func (c *Client) PostTikTokJobAndWait(args map[string]any) ([]types.Document, er
 	return c.WaitForJobCompletion(resp.UUID)
 }
 
-// PostTikTokSearchJobAndWait posts a TikTok search job with flexible arguments and waits for completion
-func (c *Client) PostTikTokSearchJobAndWait(args query.Arguments) ([]types.Document, error) {
+// SearchTikTokWithQueryArgs searches TikTok with query arguments and waits for completion, returning results directly
+func (c *Client) SearchTikTokWithQueryArgs(args query.Arguments) ([]types.Document, error) {
 	body, err := json.Marshal(jobs.TikTokSearchParams{
 		JobType: types.TiktokJob,
 		Args:    args,
@@ -134,8 +137,8 @@ func (c *Client) PostTikTokSearchJobAndWait(args query.Arguments) ([]types.Docum
 	return c.WaitForJobCompletion(resp.UUID)
 }
 
-// PostTikTokTrendingJobAndWait posts a TikTok trending job with flexible arguments and waits for completion
-func (c *Client) PostTikTokTrendingJobAndWait(args trending.Arguments) ([]types.Document, error) {
+// SearchTikTokTrendingWithArgs searches TikTok trending with custom arguments and waits for completion, returning results directly
+func (c *Client) SearchTikTokTrendingWithArgs(args trending.Arguments) ([]types.Document, error) {
 	body, err := json.Marshal(jobs.TikTokTrendingParams{
 		JobType: types.TiktokJob,
 		Args:    args,
@@ -153,8 +156,8 @@ func (c *Client) PostTikTokTrendingJobAndWait(args trending.Arguments) ([]types.
 	return c.WaitForJobCompletion(resp.UUID)
 }
 
-// PostTikTokTranscriptionJobAndWait posts a TikTok transcription job with flexible arguments and waits for completion
-func (c *Client) PostTikTokTranscriptionJobAndWait(args transcription.Arguments) ([]types.Document, error) {
+// TranscribeTikTokWithArgs transcribes TikTok with custom arguments and waits for completion, returning results directly
+func (c *Client) TranscribeTikTokWithArgs(args transcription.Arguments) ([]types.Document, error) {
 	body, err := json.Marshal(jobs.TikTokTranscriptionParams{
 		JobType: types.TiktokJob,
 		Args:    args,

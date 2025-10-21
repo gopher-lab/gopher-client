@@ -8,8 +8,8 @@ import (
 	"github.com/masa-finance/tee-worker/api/types"
 )
 
-// PerformSimilaritySearch sends a POST request to the web similarity search endpoint
-func (c *Client) PerformSimilaritySearch(
+// SearchSimilarity performs a similarity search and returns results directly
+func (c *Client) SearchSimilarity(
 	query string,
 	sources []types.Source,
 	keywords []string,

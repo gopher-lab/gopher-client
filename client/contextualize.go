@@ -11,7 +11,7 @@ import (
 // Args:
 //   - currentQuery: Current search query to contextualize
 //   - chatHistory: Previous chat history for context
-//   - maxHistoryItems: Maximum number of history items to use (1-10, default 5)
+//   - maxHistoryItems: Maximum number of history items to use (1-10, default 5). Use 0 for default.
 //
 // Returns:
 //   - A pointer to ContextualizeResponse containing the contextualized query and metadata, or an error if the operation fails
@@ -41,14 +41,3 @@ func (c *Client) ContextualizeQuery(currentQuery string, chatHistory []types.Cha
 	return &response, nil
 }
 
-// ContextualizeQueryWithDefaults contextualizes a query using default maxHistoryItems (5)
-//
-// Args:
-//   - currentQuery: Current search query to contextualize
-//   - chatHistory: Previous chat history for context
-//
-// Returns:
-//   - A pointer to ContextualizeResponse containing the contextualized query and metadata, or an error if the operation fails
-func (c *Client) ContextualizeQueryWithDefaults(currentQuery string, chatHistory []types.ChatHistoryItem) (*types.ContextualizeResponse, error) {
-	return c.ContextualizeQuery(currentQuery, chatHistory, 5)
-}

@@ -8,8 +8,8 @@ import (
 	"github.com/masa-finance/tee-worker/api/types"
 )
 
-// PerformHybridSearch sends a POST request to the web hybrid search endpoint
-func (c *Client) PerformHybridSearch(
+// SearchHybrid performs a hybrid search and returns results directly
+func (c *Client) SearchHybrid(
 	query string,
 	sources []types.Source,
 	text string,

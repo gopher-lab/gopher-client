@@ -9,8 +9,8 @@ import (
 	"github.com/masa-finance/tee-worker/api/types"
 )
 
-// PostWebJob posts a Web job to the API
-func (c *Client) PostWebJob(args page.Arguments) (*types.ResultResponse, error) {
+// ScrapeWebWithArgsAsync scrapes a web page with custom arguments and returns a job ID
+func (c *Client) ScrapeWebWithArgsAsync(args page.Arguments) (*types.ResultResponse, error) {
 	body, err := json.Marshal(jobs.WebParams{
 		JobType: types.WebJob,
 		Args:    args,
@@ -21,20 +21,20 @@ func (c *Client) PostWebJob(args page.Arguments) (*types.ResultResponse, error) 
 	return c.doRequest(c.BaseURL+jobEndpoint, body)
 }
 
-// PerformWebSearch performs a web search job using the provided URL
-func (c *Client) PerformWebSearch(url string) (*types.ResultResponse, error) {
+// ScrapeWebAsync performs a web scraping job using the provided URL and returns a job ID
+func (c *Client) ScrapeWebAsync(url string) (*types.ResultResponse, error) {
 	args := page.NewArguments()
 	args.URL = url
-	res, err := c.PostWebJob(args)
+	res, err := c.ScrapeWebWithArgsAsync(args)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-// PerformWebSearchAndWait performs a web search and waits for completion
-func (c *Client) PerformWebSearchAndWait(url string) ([]types.Document, error) {
-	resp, err := c.PerformWebSearch(url)
+// ScrapeWeb performs a web scraping job and waits for completion, returning results directly
+func (c *Client) ScrapeWeb(url string) ([]types.Document, error) {
+	resp, err := c.ScrapeWebAsync(url)
 	if err != nil {
 		return nil, err
 	}
@@ -44,9 +44,9 @@ func (c *Client) PerformWebSearchAndWait(url string) ([]types.Document, error) {
 	return c.WaitForJobCompletion(resp.UUID)
 }
 
-// PostWebJobAndWait posts a web job and waits for completion
-func (c *Client) PostWebJobAndWait(args page.Arguments) ([]types.Document, error) {
-	resp, err := c.PostWebJob(args)
+// ScrapeWebWithArgs scrapes a web page with custom arguments and waits for completion, returning results directly
+func (c *Client) ScrapeWebWithArgs(args page.Arguments) ([]types.Document, error) {
+	resp, err := c.ScrapeWebWithArgsAsync(args)
 	if err != nil {
 		return nil, err
 	}

@@ -10,7 +10,7 @@ import (
 //
 // Args:
 //   - userInput: The user input to extract search terms from
-//   - maxTerms: Maximum number of search terms to extract (1-6, default 4)
+//   - maxTerms: Maximum number of search terms to extract (1-6, default 4). Use 0 for default.
 //
 // Returns:
 //   - A pointer to ExtractionResponse containing the extracted search terms and metadata, or an error if the operation fails
@@ -37,15 +37,4 @@ func (c *Client) ExtractSearchTerms(userInput string, maxTerms int) (*types.Extr
 	}
 
 	return &response, nil
-}
-
-// ExtractSearchTermsWithDefaults extracts search terms using default maxTerms (4)
-//
-// Args:
-//   - userInput: The user input to extract search terms from
-//
-// Returns:
-//   - A pointer to ExtractionResponse containing the extracted search terms and metadata, or an error if the operation fails
-func (c *Client) ExtractSearchTermsWithDefaults(userInput string) (*types.ExtractionResponse, error) {
-	return c.ExtractSearchTerms(userInput, 4)
 }

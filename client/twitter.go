@@ -9,8 +9,8 @@ import (
 	"github.com/masa-finance/tee-worker/api/types"
 )
 
-// PostTwitterJob posts a Twitter job to the API
-func (c *Client) PostTwitterJob(args search.Arguments) (*types.ResultResponse, error) {
+// SearchTwitterWithArgsAsync searches Twitter with custom arguments and returns a job ID
+func (c *Client) SearchTwitterWithArgsAsync(args search.Arguments) (*types.ResultResponse, error) {
 	body, err := json.Marshal(jobs.TwitterParams{
 		JobType: types.TwitterJob,
 		Args:    args,
@@ -21,20 +21,20 @@ func (c *Client) PostTwitterJob(args search.Arguments) (*types.ResultResponse, e
 	return c.doRequest(c.BaseURL+jobEndpoint, body)
 }
 
-// PerformTwitterSearch performs a Twitter search job
-func (c *Client) PerformTwitterSearch(query string) (*types.ResultResponse, error) {
+// SearchTwitterAsync performs a Twitter search job and returns a job ID
+func (c *Client) SearchTwitterAsync(query string) (*types.ResultResponse, error) {
 	args := search.NewArguments()
 	args.Query = query
-	res, err := c.PostTwitterJob(args)
+	res, err := c.SearchTwitterWithArgsAsync(args)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-// PerformTwitterSearchAndWait performs a Twitter search and waits for completion
-func (c *Client) PerformTwitterSearchAndWait(query string) ([]types.Document, error) {
-	resp, err := c.PerformTwitterSearch(query)
+// SearchTwitter performs a Twitter search and waits for completion, returning results directly
+func (c *Client) SearchTwitter(query string) ([]types.Document, error) {
+	resp, err := c.SearchTwitterAsync(query)
 	if err != nil {
 		return nil, err
 	}
@@ -44,9 +44,9 @@ func (c *Client) PerformTwitterSearchAndWait(query string) ([]types.Document, er
 	return c.WaitForJobCompletion(resp.UUID)
 }
 
-// PostTwitterJobAndWait posts a Twitter job and waits for completion
-func (c *Client) PostTwitterJobAndWait(args search.Arguments) ([]types.Document, error) {
-	resp, err := c.PostTwitterJob(args)
+// SearchTwitterWithArgs searches Twitter with custom arguments and waits for completion, returning results directly
+func (c *Client) SearchTwitterWithArgs(args search.Arguments) ([]types.Document, error) {
+	resp, err := c.SearchTwitterWithArgsAsync(args)
 	if err != nil {
 		return nil, err
 	}

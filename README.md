@@ -41,8 +41,8 @@ func main() {
         log.Fatal(err)
     }
     
-    // Perform a web search
-    result, err := c.PerformWebSearch("https://example.com")
+    // Scrape a web page (async)
+    result, err := c.ScrapeWebAsync("https://example.com")
     if err != nil {
         log.Fatal(err)
     }
@@ -67,8 +67,8 @@ func main() {
     // Create a new client with explicit configuration
     c := client.NewClient("https://data.gopher-ai.com/api", "your-api-token")
     
-    // Perform a web search
-    result, err := c.PerformWebSearch("https://example.com")
+    // Scrape a web page (async)
+    result, err := c.ScrapeWebAsync("https://example.com")
     if err != nil {
         log.Fatal(err)
     }
@@ -102,71 +102,78 @@ client := client.MustNewClientFromConfig()
 
 ## Client Methods
 
-### 🌐 Web Search
+### 🌐 Web Scraping
 ```go
-// Submit job
-result, err := client.PerformWebSearch("https://example.com")
+// Submit job (async)
+result, err := client.ScrapeWebAsync("https://example.com")
 fmt.Printf("Job ID: %s\n", result.UUID)
 
-// Wait for results
-results, err := client.PerformWebSearchAndWait("https://example.com")
+// Get results directly (sync)
+results, err := client.ScrapeWeb("https://example.com")
 ```
 
 ### 🐦 Twitter Search
 ```go
-// Submit job
-result, err := client.PerformTwitterSearch("golang programming")
+// Submit job (async)
+result, err := client.SearchTwitterAsync("golang programming")
 fmt.Printf("Job ID: %s\n", result.UUID)
 
-// Wait for results
-results, err := client.PerformTwitterSearchAndWait("golang programming")
+// Get results directly (sync)
+results, err := client.SearchTwitter("golang programming")
 ```
 
-### 👽 Reddit Search
+### 👽 Reddit Operations
 ```go
-// Submit jobs
-result, err := client.PerformRedditSearchPosts("golang", 10)
-result, err := client.PerformRedditSearchUsers("username", 5)
-result, err := client.PerformRedditScrapeURL("https://reddit.com/r/golang", 10)
+// Scrape Reddit URL (async)
+result, err := client.ScrapeRedditURLAsync("https://reddit.com/r/golang", 10)
+fmt.Printf("Job ID: %s\n", result.UUID)
 
-// Wait for results
-results, err := client.PerformRedditSearchPostsAndWait("golang", 10)
-results, err := client.PerformRedditSearchUsersAndWait("username", 5)
-results, err := client.PerformRedditScrapeURLAndWait("https://reddit.com/r/golang", 10)
+// Scrape Reddit URL (sync)
+results, err := client.ScrapeRedditURL("https://reddit.com/r/golang", 10)
+
+// Search Reddit posts (sync)
+results, err := client.SearchRedditPosts("golang", 10)
+
+// Search Reddit users (sync)
+results, err := client.SearchRedditUsers("username", 5)
+
+// Search Reddit communities (sync)
+results, err := client.SearchRedditCommunities("golang", 10)
 ```
 
 ### 💼 LinkedIn Search
 ```go
 import ptypes "github.com/masa-finance/tee-worker/api/types/linkedin/profile"
 
-// Submit job
-result, err := client.PerformLinkedInSearch("software engineer", ptypes.ScraperModeShort)
+// Submit job (async)
+result, err := client.SearchLinkedInAsync("software engineer", ptypes.ScraperModeShort)
+fmt.Printf("Job ID: %s\n", result.UUID)
 
-// Wait for results
-results, err := client.PerformLinkedInSearchAndWait("software engineer", ptypes.ScraperModeShort)
+// Get results directly (sync)
+results, err := client.SearchLinkedIn("software engineer", ptypes.ScraperModeShort)
 ```
 
-### 🎵 TikTok Search
+### 🎵 TikTok Operations
 ```go
-// Submit jobs
-result, err := client.PerformTikTokSearch("golang tutorial", 10)
-result, err := client.PerformTikTokSearchByTrending("views", 20)
-result, err := client.PerformTikTokTranscription("https://tiktok.com/@user/video/123")
+// Submit jobs (async)
+result, err := client.SearchTikTokAsync("golang tutorial", 10)
+result, err := client.SearchTikTokTrendingAsync("views", 20)
+result, err := client.TranscribeTikTokAsync("https://tiktok.com/@user/video/123")
 
-// Wait for results
-results, err := client.PerformTikTokSearchAndWait("golang tutorial", 10)
-results, err := client.PerformTikTokSearchByTrendingAndWait("views", 20)
-results, err := client.PerformTikTokTranscriptionAndWait("https://tiktok.com/@user/video/123")
+// Get results directly (sync)
+results, err := client.SearchTikTok("golang tutorial", 10)
+results, err := client.SearchTikTokTrending("views", 20)
+results, err := client.TranscribeTikTok("https://tiktok.com/@user/video/123")
 ```
 
-### 🔍 Similarity Search
+### 🔍 Search & Analysis
 ```go
 import "github.com/masa-finance/tee-worker/api/types"
 
 sources := []types.Source{types.WebSource, types.TwitterSource, types.RedditSource}
 
 // Similarity search (immediate results)
-results, err := client.PerformSimilaritySearch(
+results, err := client.SearchSimilarity(
     "artificial intelligence",
     sources,
     []string{"AI", "machine learning"},
@@ -175,7 +182,7 @@ results, err := client.PerformSimilaritySearch(
 )
 
 // Hybrid search (immediate results)
-results, err := client.PerformHybridSearch(
+results, err := client.SearchHybrid(
     "machine learning",
     sources,
     "artificial intelligence",
@@ -200,16 +207,52 @@ models, err := client.GetAvailableModels()
 
 ### 🔧 Search Tools
 ```go
-// Extract search terms
-response, err := client.ExtractSearchTermsWithDefaults(
+// Extract search terms with default maxTerms (4)
+response, err := client.ExtractSearchTerms(
     "Find articles about blockchain technology",
+    0, // Use 0 for default
 )
 
-// Contextualize query
-response, err := client.ContextualizeQueryWithDefaults(
+// Extract search terms with custom maxTerms
+response, err := client.ExtractSearchTerms(
+    "Find articles about blockchain technology",
+    6, // Custom maxTerms
+)
+
+// Contextualize query with default maxHistoryItems (5)
+response, err := client.ContextualizeQuery(
     "Tell me more about that",
     chatHistory,
+    0, // Use 0 for default
 )
+
+// Contextualize query with custom maxHistoryItems
+response, err := client.ContextualizeQuery(
+    "Tell me more about that",
+    chatHistory,
+    8, // Custom maxHistoryItems
+)
+```
+
+### 🔧 Advanced Operations with Custom Arguments
+```go
+// Web scraping with custom arguments
+results, err := client.ScrapeWebWithArgs(pageArgs)
+
+// Twitter search with custom arguments  
+results, err := client.SearchTwitterWithArgs(searchArgs)
+
+// Reddit search with custom arguments
+results, err := client.SearchRedditWithArgs(redditArgs)
+
+// LinkedIn search with custom arguments
+results, err := client.SearchLinkedInWithArgs(linkedinArgs)
+
+// TikTok operations with custom arguments
+results, err := client.SearchTikTokWithArgs(tiktokArgs)
+results, err := client.SearchTikTokWithQueryArgs(queryArgs)
+results, err := client.SearchTikTokTrendingWithArgs(trendingArgs)
+results, err := client.TranscribeTikTokWithArgs(transcriptionArgs)
 ```
 
 ### 📊 Metrics

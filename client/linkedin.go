@@ -10,8 +10,8 @@ import (
 	ptypes "github.com/masa-finance/tee-worker/api/types/linkedin/profile"
 )
 
-// PostLinkedInJob posts a LinkedIn job to the API
-func (c *Client) PostLinkedInJob(args profile.Arguments) (*types.ResultResponse, error) {
+// SearchLinkedInWithArgsAsync searches LinkedIn with custom arguments and returns a job ID
+func (c *Client) SearchLinkedInWithArgsAsync(args profile.Arguments) (*types.ResultResponse, error) {
 	body, err := json.Marshal(jobs.LinkedInParams{
 		JobType: types.LinkedInJob,
 		Args:    args,
@@ -22,22 +22,22 @@ func (c *Client) PostLinkedInJob(args profile.Arguments) (*types.ResultResponse,
 	return c.doRequest(c.BaseURL+jobEndpoint, body)
 }
 
-// PerformLinkedInSearch performs a LinkedIn search job
-func (c *Client) PerformLinkedInSearch(query string, mode ptypes.ScraperMode) (*types.ResultResponse, error) {
+// SearchLinkedInAsync performs a LinkedIn search job and returns a job ID
+func (c *Client) SearchLinkedInAsync(query string, mode ptypes.ScraperMode) (*types.ResultResponse, error) {
 	args := profile.NewArguments()
 	args.ScraperMode = mode
 	args.Query = query
 
-	res, err := c.PostLinkedInJob(args)
+	res, err := c.SearchLinkedInWithArgsAsync(args)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-// PerformLinkedInSearchAndWait performs a LinkedIn search and waits for completion
-func (c *Client) PerformLinkedInSearchAndWait(query string, mode ptypes.ScraperMode) ([]types.Document, error) {
-	resp, err := c.PerformLinkedInSearch(query, mode)
+// SearchLinkedIn performs a LinkedIn search and waits for completion, returning results directly
+func (c *Client) SearchLinkedIn(query string, mode ptypes.ScraperMode) ([]types.Document, error) {
+	resp, err := c.SearchLinkedInAsync(query, mode)
 	if err != nil {
 		return nil, err
 	}
@@ -47,9 +47,9 @@ func (c *Client) PerformLinkedInSearchAndWait(query string, mode ptypes.ScraperM
 	return c.WaitForJobCompletion(resp.UUID)
 }
 
-// PostLinkedInJobAndWait posts a LinkedIn job and waits for completion
-func (c *Client) PostLinkedInJobAndWait(args profile.Arguments) ([]types.Document, error) {
-	resp, err := c.PostLinkedInJob(args)
+// SearchLinkedInWithArgs searches LinkedIn with custom arguments and waits for completion, returning results directly
+func (c *Client) SearchLinkedInWithArgs(args profile.Arguments) ([]types.Document, error) {
+	resp, err := c.SearchLinkedInWithArgsAsync(args)
 	if err != nil {
 		return nil, err
 	}
