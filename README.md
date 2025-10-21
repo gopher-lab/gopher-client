@@ -53,32 +53,6 @@ func main() {
 }
 ```
 
-### Using Explicit Configuration
-```go
-package main
-
-import (
-    "fmt"
-    "log"
-    
-    "github.com/gopher-lab/gopher-client/client"
-    "github.com/masa-finance/tee-worker/api/types"
-)
-
-func main() {
-    // Create a new client with explicit configuration
-    c := client.NewClient("https://data.gopher-ai.com/api", "your-api-token")
-    
-    // Scrape a web page (async)
-    result, err := c.ScrapeWebAsync("https://example.com")
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    fmt.Printf("Job ID: %s\n", result.UUID)
-}
-```
-
 ### Configure with Functional Options
 
 ```go
