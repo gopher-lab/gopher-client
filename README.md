@@ -126,21 +126,6 @@ fmt.Printf("Job ID: %s\n", job.UUID)
 
 // Get results directly (sync)
 results, err := client.SearchLinkedIn("software engineer")
-
-// Advanced: Use custom arguments for scraper mode
-import ptypes "github.com/masa-finance/tee-worker/api/types/linkedin/profile"
-import "github.com/masa-finance/tee-worker/api/args/linkedin/profile"
-
-args := profile.NewArguments()
-args.Query = "software engineer"
-args.ScraperMode = ptypes.ScraperModeShort
-
-// Submit with custom args (async)
-job, err := client.SearchLinkedInWithArgsAsync(args)
-fmt.Printf("Job ID: %s\n", job.UUID)
-
-// Get results with custom args (sync)
-results, err := client.SearchLinkedInWithArgs(args)
 ```
 
 ### 🎵 TikTok Operations
@@ -257,7 +242,29 @@ results, err := client.SearchLinkedInWithArgs(linkedinArgs)
 results, err := client.SearchTikTokWithArgs(queryArgs)
 results, err := client.SearchTikTokTrendingWithArgs(trendingArgs)
 results, err := client.TranscribeTikTokWithArgs(transcriptionArgs)
+
+// Example, advanced usage with LinkedIn
+import linkedin "github.com/masa-finance/tee-worker/api/args/linkedin/profile"
+import "github.com/masa-finance/tee-worker/api/types/linkedin/profile"
+import "github.com/masa-finance/tee-worker/api/types/linkedin/experiences"
+
+args := linkedin.NewArguments()
+args.Query = "software engineer"
+args.ScraperMode = profile.ScraperModeFull
+args.YearsOfExperience = []experiences.Id{experiences.ThreeToFiveYears}
+args.SeniorityLevels = []seniorities.Id{seniorities.Senior}
+args.Functions = []functions.Id{functions.Engineering}
+args.Industries = []industries.Id{industries.SoftwareDevelopment}
+
+// Submit with custom args (async)
+job, err := client.SearchLinkedInWithArgsAsync(args)
+fmt.Printf("Job ID: %s\n", job.UUID)
+
+// Get results with custom args (sync)
+results, err := client.SearchLinkedInWithArgs(args)
 ```
+
+
 
 ### 📊 Metrics
 ```go
