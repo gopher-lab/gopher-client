@@ -17,17 +17,21 @@ const jobEndpoint = "/v1/search/live"
 
 // Client represents the API client
 type Client struct {
-	BaseURL string
-	Token   string
-	Timeout time.Duration
+	BaseURL    string
+	Token      string
+	Timeout    time.Duration
+	HTTPClient *http.Client
 }
 
 // NewClient creates a new API client
 func NewClient(baseURL string, token string) *Client {
+	// preserve existing behavior: 60s timeout
+	opts, _ := NewOptions(Timeout(60 * time.Second))
 	return &Client{
-		BaseURL: baseURL,
-		Token:   token,
-		Timeout: 60 * time.Second, // Default timeout
+		BaseURL:    baseURL,
+		Token:      token,
+		Timeout:    60 * time.Second,
+		HTTPClient: opts.HttpClient,
 	}
 }
 
@@ -37,11 +41,12 @@ func NewClientFromConfig() (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to load config: %w", err)
 	}
-
+	opts, _ := NewOptions(Timeout(cfg.Timeout))
 	return &Client{
-		BaseURL: cfg.BaseUrl,
-		Token:   cfg.Token,
-		Timeout: cfg.Timeout,
+		BaseURL:    cfg.BaseUrl,
+		Token:      cfg.Token,
+		Timeout:    cfg.Timeout,
+		HTTPClient: opts.HttpClient,
 	}, nil
 }
 
@@ -79,10 +84,7 @@ func (c *Client) doRequest(url string, requestBody []byte) (*types.ResultRespons
 		req.Header.Set("Authorization", "Bearer "+c.Token)
 	}
 
-	client := &http.Client{
-		Timeout: c.Timeout,
-	}
-	resp, err := client.Do(req)
+	resp, err := c.HTTPClient.Do(req)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to do POST request to %s: %w", url, err)
@@ -117,10 +119,7 @@ func (c *Client) doStatusRequest(url string) (*types.IndexerJobResult, error) {
 		req.Header.Set("Authorization", "Bearer "+c.Token)
 	}
 
-	client := &http.Client{
-		Timeout: c.Timeout,
-	}
-	resp, err := client.Do(req)
+	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to do GET request to %s: %w", url, err)
 	}
@@ -153,10 +152,7 @@ func (c *Client) doResultRequest(url string, receiver any) error {
 		req.Header.Set("Authorization", "Bearer "+c.Token)
 	}
 
-	client := &http.Client{
-		Timeout: c.Timeout,
-	}
-	resp, err := client.Do(req)
+	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to do GET request to %s: %w", url, err)
 	}
@@ -189,10 +185,7 @@ func (c *Client) doMetricsRequest(url string, receiver any) error {
 		req.Header.Set("Authorization", "Bearer "+c.Token)
 	}
 
-	client := &http.Client{
-		Timeout: c.Timeout,
-	}
-	resp, err := client.Do(req)
+	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to do GET request to %s: %w", url, err)
 	}
@@ -225,10 +218,7 @@ func (c *Client) doImmediateRequest(url string, requestBody []byte, receiver any
 		req.Header.Set("Authorization", "Bearer "+c.Token)
 	}
 
-	client := &http.Client{
-		Timeout: c.Timeout,
-	}
-	resp, err := client.Do(req)
+	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to do POST request to %s: %w", url, err)
 	}
@@ -248,6 +238,23 @@ func (c *Client) doImmediateRequest(url string, requestBody []byte, receiver any
 	}
 
 	return getErrorFromResponse(body)
+}
+
+// NewClientWithOptions creates a new API client with functional options.
+// Non-breaking addition; callers can keep using NewClient/NewClientFromConfig.
+func NewClientWithOptions(baseURL string, token string, opts ...Option) (*Client, error) {
+	options, err := NewOptions(opts...)
+	if err != nil {
+		return nil, err
+	}
+	// default Timeout field mirrors the http client timeout unless overridden via Timeout option
+	timeout := options.HttpClient.Timeout
+	return &Client{
+		BaseURL:    baseURL,
+		Token:      token,
+		Timeout:    timeout,
+		HTTPClient: options.HttpClient,
+	}, nil
 }
 
 // GetJobStatus sends a GET request to the job status endpoint

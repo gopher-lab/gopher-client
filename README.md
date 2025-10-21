@@ -10,7 +10,7 @@ go get github.com/gopher-lab/gopher-client
 
 ## Quick Start
 
-The client can be configured using environment variables or by passing parameters directly:
+The client can be configured using environment variables or by passing parameters directly. By default, a single pooled HTTP client is reused across requests for performance; you can customize pooling and timeouts with options if needed (see section below).
 
 ### Environment Variables
 
@@ -413,3 +413,74 @@ for source, docs := range results {
 fmt.Printf("Total documents collected: %d\n", totalDocs)
 ```
 
+
+## HTTP Client, Timeouts, and Connection Pooling
+
+This client now reuses a single pooled `*http.Client` under the hood for all requests to improve performance and connection reuse. Existing constructors and usage remain unchanged.
+
+- `NewClient(baseURL, token)` keeps the default 60s timeout.
+- `NewClientFromConfig()` uses the timeout from your environment/config.
+- For advanced control, use `NewClientWithOptions` and functional options.
+
+### Configure with Functional Options
+
+```go
+package main
+
+import (
+    "time"
+    "github.com/gopher-lab/gopher-client/client"
+)
+
+func main() {
+    c, err := client.NewClientWithOptions(
+        "https://data.gopher-ai.com/api",
+        "your-api-token",
+        client.Timeout(90*time.Second),
+        client.MaxIdleConnsPerHost(50),
+        client.MaxConnsPerHost(200),
+    )
+    if err != nil { panic(err) }
+
+    _ = c // use the client
+}
+```
+
+### Inject a Custom `http.Client`
+
+If you need full control (custom proxies, tracing, etc.), inject your own `*http.Client`. When provided, pool options are ignored in favor of your client.
+
+```go
+package main
+
+import (
+    "net/http"
+    "time"
+    "github.com/gopher-lab/gopher-client/client"
+)
+
+func main() {
+    hc := &http.Client{ Timeout: 30 * time.Second }
+    c, err := client.NewClientWithOptions(
+        "https://data.gopher-ai.com/api",
+        "your-api-token",
+        client.HttpClient(hc),
+    )
+    if err != nil { panic(err) }
+
+    _ = c
+}
+```
+
+### Local development (self-signed certs)
+
+```go
+c, err := client.NewClientWithOptions(
+    baseURL, token,
+    client.IgnoreTLSCert(), // skip TLS verification (development only)
+)
+```
+
+### Environment timeouts
+
+`GOPHER_CLIENT_TIMEOUT` affects both job polling (the `AndWait` helpers) and the HTTP client's request timeout when using `NewClientFromConfig()`.
