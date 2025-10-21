@@ -17,7 +17,7 @@ var _ = Describe("Analysis Client", func() {
 		}
 	})
 
-	Describe("AnalyzeData", func() {
+	Describe("AnalyzeDataWithArgs", func() {
 		Context("with valid input", func() {
 			It("should analyze data successfully", func() {
 				data := []string{
@@ -28,7 +28,7 @@ var _ = Describe("Analysis Client", func() {
 				prompt := "Analyze the sentiment of these tweets"
 				model := "openai/gpt-4o-mini"
 
-				response, err := client.AnalyzeData(data, prompt, model, false, nil, "")
+				response, err := client.AnalyzeDataWithArgs(data, prompt, model, false, nil, "")
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(response).NotTo(BeNil())
@@ -45,7 +45,7 @@ var _ = Describe("Analysis Client", func() {
 				data := []string{}
 				prompt := "Analyze this data"
 
-				response, err := client.AnalyzeData(data, prompt, "", false, nil, "")
+				response, err := client.AnalyzeDataWithArgs(data, prompt, "", false, nil, "")
 
 				// The API might return an error for empty data, which is expected
 				if err != nil {
@@ -53,6 +53,29 @@ var _ = Describe("Analysis Client", func() {
 				} else {
 					Expect(response).NotTo(BeNil())
 				}
+			})
+		})
+	})
+
+	Describe("AnalyzeData", func() {
+		Context("with simple prompt", func() {
+			It("should analyze data with default settings", func() {
+				data := []string{
+					"I love this product!",
+					"This is amazing",
+					"Great service",
+				}
+				prompt := "What is the sentiment?"
+
+				response, err := client.AnalyzeData(data, prompt)
+
+				Expect(err).NotTo(HaveOccurred())
+				Expect(response).NotTo(BeNil())
+				Expect(response.Analysis).NotTo(BeEmpty())
+				Expect(response.Reasoning).NotTo(BeEmpty())
+				Expect(response.ModelUsed).To(Equal("openai/gpt-4o-mini")) // Default model
+				Expect(response.TokensUsed).To(BeNumerically(">", 0))
+				Expect(response.JobUUID).NotTo(BeEmpty())
 			})
 		})
 	})

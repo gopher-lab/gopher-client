@@ -6,7 +6,7 @@ import (
 	"github.com/gopher-lab/gopher-client/types"
 )
 
-// AnalyzeData analyzes tweets and other data using various AI models via OpenRouter
+// AnalyzeDataWithArgs analyzes tweets and other data using various AI models via OpenRouter with custom arguments
 //
 // Args:
 //   - tweets: Array of tweets to analyze
@@ -18,7 +18,7 @@ import (
 //
 // Returns:
 //   - A pointer to AnalysisResponse containing the analysis results and metadata, or an error if the operation fails
-func (c *Client) AnalyzeData(data []string, prompt string, model string, app bool, chatHistory []types.ChatHistoryItem, currentQuery string) (*types.AnalysisResponse, error) {
+func (c *Client) AnalyzeDataWithArgs(data []string, prompt string, model string, app bool, chatHistory []types.ChatHistoryItem, currentQuery string) (*types.AnalysisResponse, error) {
 	// Set default model if not provided
 	if model == "" {
 		model = "openai/gpt-4o-mini"
@@ -47,7 +47,7 @@ func (c *Client) AnalyzeData(data []string, prompt string, model string, app boo
 	return &response, nil
 }
 
-// AnalyzeDataSimple analyzes tweets with a simple prompt using default settings
+// AnalyzeData analyzes tweets with a simple prompt using default settings
 //
 // Args:
 //   - tweets: Array of tweets to analyze
@@ -55,8 +55,8 @@ func (c *Client) AnalyzeData(data []string, prompt string, model string, app boo
 //
 // Returns:
 //   - A pointer to AnalysisResponse containing the analysis results and metadata, or an error if the operation fails
-func (c *Client) AnalyzeDataSimple(tweets []string, prompt string) (*types.AnalysisResponse, error) {
-	return c.AnalyzeData(tweets, prompt, "", false, nil, "")
+func (c *Client) AnalyzeData(tweets []string, prompt string) (*types.AnalysisResponse, error) {
+	return c.AnalyzeDataWithArgs(tweets, prompt, "", false, nil, "")
 }
 
 // GetAvailableModels retrieves the list of available AI models for analysis

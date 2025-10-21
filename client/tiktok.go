@@ -11,18 +11,6 @@ import (
 	"github.com/masa-finance/tee-worker/api/types"
 )
 
-// SearchTikTokWithArgsAsync searches TikTok with custom arguments and returns a job ID
-func (c *Client) SearchTikTokWithArgsAsync(args map[string]any) (*types.ResultResponse, error) {
-	body, err := json.Marshal(jobs.TikTokParams{
-		JobType: types.TiktokJob,
-		Args:    args,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return c.doRequest(c.BaseURL+jobEndpoint, body)
-}
-
 // TranscribeTikTokAsync performs a TikTok transcription job and returns a job ID
 func (c *Client) TranscribeTikTokAsync(url string) (*types.ResultResponse, error) {
 	args := transcription.NewArguments()
@@ -106,20 +94,8 @@ func (c *Client) SearchTikTokTrending(sortBy string, maxItems int) ([]types.Docu
 	return c.WaitForJobCompletion(resp.UUID)
 }
 
-// SearchTikTokWithArgs searches TikTok with custom arguments and waits for completion, returning results directly
-func (c *Client) SearchTikTokWithArgs(args map[string]any) ([]types.Document, error) {
-	resp, err := c.SearchTikTokWithArgsAsync(args)
-	if err != nil {
-		return nil, err
-	}
-	if resp.Error != "" {
-		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
-	}
-	return c.WaitForJobCompletion(resp.UUID)
-}
-
-// SearchTikTokWithQueryArgs searches TikTok with query arguments and waits for completion, returning results directly
-func (c *Client) SearchTikTokWithQueryArgs(args query.Arguments) ([]types.Document, error) {
+// SearchTikTokWithArgs searches TikTok with query arguments and waits for completion, returning results directly
+func (c *Client) SearchTikTokWithArgs(args query.Arguments) ([]types.Document, error) {
 	body, err := json.Marshal(jobs.TikTokSearchParams{
 		JobType: types.TiktokJob,
 		Args:    args,

@@ -20,8 +20,6 @@ export GOPHER_CLIENT_TIMEOUT="120s"  # Optional: default is 60s
 export GOPHER_CLIENT_URL="https://data.gopher-ai.com/api" # Optional: default is present
 ```
 
-**Note:** The `GOPHER_CLIENT_TIMEOUT` environment variable automatically configures timeouts for all `AndWait` methods and HTTP requests.
-
 ### Using Environment Variables (Recommended)
 ```go
 package main
@@ -195,10 +193,20 @@ results, err := client.SearchHybrid(
 
 ### 🤖 AI Analysis
 ```go
-// Analyze data
-response, err := client.AnalyzeDataSimple(
+// Analyze data with simple prompt (default settings)
+response, err := client.AnalyzeData(
     []string{"tweet1", "tweet2"},
     "What is the sentiment?",
+)
+
+// Analyze data with custom arguments
+response, err := client.AnalyzeDataWithArgs(
+    []string{"tweet1", "tweet2"},
+    "What is the sentiment?",
+    "openai/gpt-4o",  // Custom model
+    true,            // App request
+    chatHistory,     // Chat history
+    "current query", // Current query
 )
 
 // Get available models
@@ -249,8 +257,7 @@ results, err := client.SearchRedditWithArgs(redditArgs)
 results, err := client.SearchLinkedInWithArgs(linkedinArgs)
 
 // TikTok operations with custom arguments
-results, err := client.SearchTikTokWithArgs(tiktokArgs)
-results, err := client.SearchTikTokWithQueryArgs(queryArgs)
+results, err := client.SearchTikTokWithArgs(queryArgs)
 results, err := client.SearchTikTokTrendingWithArgs(trendingArgs)
 results, err := client.TranscribeTikTokWithArgs(transcriptionArgs)
 ```
