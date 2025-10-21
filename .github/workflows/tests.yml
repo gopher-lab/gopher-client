@@ -21,10 +21,7 @@ jobs:
           cookies
         key: ${{ runner.os }}-cookies
     - name: Run tests
-      run: |
-        make test
-        sudo mv coverage/coverage.txt coverage.txt
-        sudo chmod 777 coverage.txt
+      run: make test
 
   ready-to-merge:
       runs-on: ubuntu-latest
