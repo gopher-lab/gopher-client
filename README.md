@@ -8,9 +8,13 @@ A Go client library for interacting with the Gopher AI data collection and searc
 go get github.com/gopher-lab/gopher-client
 ```
 
-## Quick Start
+## HTTP Client, Timeouts, and Connection Pooling
 
-The client can be configured using environment variables or by passing parameters directly. By default, a single pooled HTTP client is reused across requests for performance; you can customize pooling and timeouts with options if needed (see section below).
+This client reuses a single pooled `*http.Client` under the hood for all requests to improve performance and connection reuse. The default timeout is 60s.
+
+- `NewClient(baseURL, token)` keeps the defaults.
+- `NewClientFromConfig()` uses your environment/config.
+- `NewClientWithOptions` uses functional options.
 
 ### Environment Variables
 
@@ -75,27 +79,28 @@ func main() {
 }
 ```
 
-### Programmatic Configuration
+### Configure with Functional Options
 
 ```go
-import "github.com/gopher-lab/gopher-client/config"
+package main
 
-// Method 1: Load config manually and create client
-config, err := config.LoadConfig()
-if err != nil {
-    log.Fatal(err)
+import (
+    "time"
+    "github.com/gopher-lab/gopher-client/client"
+)
+
+func main() {
+    c, err := client.NewClientWithOptions(
+        "https://data.gopher-ai.com/api",
+        "your-api-token",
+        client.Timeout(90*time.Second),
+        client.MaxIdleConnsPerHost(50),
+        client.MaxConnsPerHost(200),
+    )
+    if err != nil { panic(err) }
+
+    _ = c // use the client
 }
-
-client := client.NewClient(config.BaseUrl, config.Token)
-
-// Method 2: Create client directly from config (recommended)
-client, err := client.NewClientFromConfig()
-if err != nil {
-    log.Fatal(err)
-}
-
-// Method 3: Create client from config with panic on error
-client := client.MustNewClientFromConfig()
 ```
 
 ## Client Methods
@@ -271,230 +276,7 @@ stats, err := client.GetAllMetrics(false)
 stats, err := client.GetMetrics("web", true)
 ```
 
-## 🔧 Advanced Usage with Flexible Arguments
-
-For more control over job parameters, you can use the `Post*JobAndWait` methods with flexible argument types. These methods allow you to customize all available options for each platform.
-
-### 🌐 Advanced Web Search
-```go
-import "github.com/masa-finance/tee-worker/api/args/web/page"
-
-// Create custom web search arguments
-args := page.NewArguments()
-args.URL = "https://example.com"
-args.MaxDepth = 3
-args.FollowRedirects = true
-args.UserAgent = "CustomBot/1.0"
-
-// Submit job with custom arguments and wait
-results, err := client.PostWebJobAndWait(args)
-if err != nil {
-    log.Fatal(err)
-}
-
-fmt.Printf("Found %d documents\n", len(results))
-```
-
-### 🐦 Advanced Twitter Search
-```go
-import "github.com/masa-finance/tee-worker/api/args/twitter/search"
-
-// Create custom Twitter search arguments
-args := search.NewArguments()
-args.Query = "golang programming"
-args.MaxResults = 100
-args.Language = "en"
-args.ResultType = "recent"
-args.IncludeEntities = true
-
-// Submit job with custom arguments and wait
-results, err := client.PostTwitterJobAndWait(args)
-if err != nil {
-    log.Fatal(err)
-}
-
-fmt.Printf("Found %d tweets\n", len(results))
-```
-
-### 👽 Advanced Reddit Search
-```go
-import "github.com/masa-finance/tee-worker/api/args/reddit/search"
-
-// Search for posts with custom arguments
-args := search.NewSearchPostsArguments()
-args.Queries = []string{"golang", "programming"}
-args.MaxItems = 50
-args.Sort = "hot"
-args.TimeFilter = "week"
-
-// Submit job with custom arguments and wait
-results, err := client.PostRedditJobAndWait(args)
-if err != nil {
-    log.Fatal(err)
-}
-
-fmt.Printf("Found %d Reddit posts\n", len(results))
-```
-
-### 💼 Advanced LinkedIn Search
-```go
-import (
-    "github.com/masa-finance/tee-worker/api/args/linkedin/profile"
-    ptypes "github.com/masa-finance/tee-worker/api/types/linkedin/profile"
-)
-
-// Create custom LinkedIn search arguments
-args := profile.NewArguments()
-args.Query = "software engineer"
-args.ScraperMode = ptypes.ScraperModeShort
-args.MaxResults = 25
-args.Location = "San Francisco"
-args.ExperienceLevel = "mid-senior"
-
-// Submit job with custom arguments and wait
-results, err := client.PostLinkedInJobAndWait(args)
-if err != nil {
-    log.Fatal(err)
-}
-
-fmt.Printf("Found %d LinkedIn profiles\n", len(results))
-```
-
-### 🎵 Advanced TikTok Search
-```go
-import (
-    "github.com/masa-finance/tee-worker/api/args/tiktok/query"
-    "github.com/masa-finance/tee-worker/api/args/tiktok/trending"
-    "github.com/masa-finance/tee-worker/api/args/tiktok/transcription"
-)
-
-// Custom TikTok search
-searchArgs := query.NewArguments()
-searchArgs.Search = []string{"golang tutorial", "go programming"}
-searchArgs.MaxItems = 30
-searchArgs.SortBy = "date"
-
-results, err := client.PostTikTokSearchJobAndWait(searchArgs)
-if err != nil {
-    log.Fatal(err)
-}
-
-// Custom TikTok trending search
-trendingArgs := trending.NewArguments()
-trendingArgs.SortBy = "views"
-trendingArgs.MaxItems = 50
-trendingArgs.Region = "US"
-
-trendingResults, err := client.PostTikTokTrendingJobAndWait(trendingArgs)
-if err != nil {
-    log.Fatal(err)
-}
-
-// Custom TikTok transcription
-transcriptionArgs := transcription.NewArguments()
-transcriptionArgs.VideoURL = "https://tiktok.com/@user/video/123"
-transcriptionArgs.Language = "en"
-
-transcriptionResults, err := client.PostTikTokTranscriptionJobAndWait(transcriptionArgs)
-if err != nil {
-    log.Fatal(err)
-}
-
-fmt.Printf("Found %d search results, %d trending videos, %d transcriptions\n", 
-    len(results), len(trendingResults), len(transcriptionResults))
-```
-
-### 🔄 Batch Processing Example
-```go
-// Process multiple sources in parallel
-var wg sync.WaitGroup
-results := make(map[string][]types.Document)
-
-// Twitter search
-wg.Add(1)
-go func() {
-    defer wg.Done()
-    args := search.NewArguments()
-    args.Query = "artificial intelligence"
-    args.MaxResults = 50
-    
-    docs, err := client.PostTwitterJobAndWait(args)
-    if err == nil {
-        results["twitter"] = docs
-    }
-}()
-
-// Reddit search
-wg.Add(1)
-go func() {
-    defer wg.Done()
-    args := search.NewSearchPostsArguments()
-    args.Queries = []string{"AI", "machine learning"}
-    args.MaxItems = 30
-    
-    docs, err := client.PostRedditJobAndWait(args)
-    if err == nil {
-        results["reddit"] = docs
-    }
-}()
-
-// Web search
-wg.Add(1)
-go func() {
-    defer wg.Done()
-    args := page.NewArguments()
-    args.URL = "https://example-ai-blog.com"
-    args.MaxDepth = 2
-    
-    docs, err := client.PostWebJobAndWait(args)
-    if err == nil {
-        results["web"] = docs
-    }
-}()
-
-wg.Wait()
-
-// Process all results
-totalDocs := 0
-for source, docs := range results {
-    fmt.Printf("%s: %d documents\n", source, len(docs))
-    totalDocs += len(docs)
-}
-fmt.Printf("Total documents collected: %d\n", totalDocs)
-```
-
-
-## HTTP Client, Timeouts, and Connection Pooling
-
-This client now reuses a single pooled `*http.Client` under the hood for all requests to improve performance and connection reuse. Existing constructors and usage remain unchanged.
-
-- `NewClient(baseURL, token)` keeps the default 60s timeout.
-- `NewClientFromConfig()` uses the timeout from your environment/config.
-- For advanced control, use `NewClientWithOptions` and functional options.
-
-### Configure with Functional Options
-
-```go
-package main
-
-import (
-    "time"
-    "github.com/gopher-lab/gopher-client/client"
-)
-
-func main() {
-    c, err := client.NewClientWithOptions(
-        "https://data.gopher-ai.com/api",
-        "your-api-token",
-        client.Timeout(90*time.Second),
-        client.MaxIdleConnsPerHost(50),
-        client.MaxConnsPerHost(200),
-    )
-    if err != nil { panic(err) }
-
-    _ = c // use the client
-}
-```
+## Advanced Usage
 
 ### Inject a Custom `http.Client`
 
@@ -530,7 +312,3 @@ c, err := client.NewClientWithOptions(
     client.IgnoreTLSCert(), // skip TLS verification (development only)
 )
 ```
-
-### Environment timeouts
-
-`GOPHER_CLIENT_TIMEOUT` affects both job polling (the `AndWait` helpers) and the HTTP client's request timeout when using `NewClientFromConfig()`.
