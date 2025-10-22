@@ -244,11 +244,11 @@ results, err := client.SearchTikTokTrendingWithArgs(trendingArgs)
 results, err := client.TranscribeTikTokWithArgs(transcriptionArgs)
 
 // Example, advanced usage with LinkedIn
-import linkedin "github.com/masa-finance/tee-worker/api/args/linkedin/profile"
+import "github.com/masa-finance/tee-worker/api/args/linkedin"
 import "github.com/masa-finance/tee-worker/api/types/linkedin/profile"
 import "github.com/masa-finance/tee-worker/api/types/linkedin/experiences"
 
-args := linkedin.NewArguments()
+args := linkedin.NewProfileArguments()
 args.Query = "software engineer"
 args.ScraperMode = profile.ScraperModeFull
 args.YearsOfExperience = []experiences.Id{experiences.ThreeToFiveYears}
