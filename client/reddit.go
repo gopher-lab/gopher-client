@@ -9,19 +9,6 @@ import (
 	"github.com/masa-finance/tee-worker/api/types"
 )
 
-// SearchRedditWithArgsAsync searches Reddit with custom arguments and returns a job ID
-func (c *Client) SearchRedditWithArgsAsync(args reddit.SearchArguments) (*types.ResultResponse, error) {
-	params := params.Params[*reddit.SearchArguments]{}
-	params.JobType = types.RedditJob
-	params.Args = &args
-
-	body, err := json.Marshal(params)
-	if err != nil {
-		return nil, err
-	}
-	return c.doRequest(c.BaseURL+jobEndpoint, body)
-}
-
 // ScrapeRedditURLAsync performs a Reddit URL scraping job and returns a job ID
 func (c *Client) ScrapeRedditURLAsync(url string) (*types.ResultResponse, error) {
 	args := reddit.NewScrapeUrlsArguments()
@@ -124,4 +111,17 @@ func (c *Client) SearchRedditWithArgs(args reddit.SearchArguments) ([]types.Docu
 		return nil, fmt.Errorf("job submission failed: %s", resp.Error)
 	}
 	return c.WaitForJobCompletion(resp.UUID)
+}
+
+// SearchRedditWithArgsAsync searches Reddit with custom arguments and returns a job ID
+func (c *Client) SearchRedditWithArgsAsync(args reddit.SearchArguments) (*types.ResultResponse, error) {
+	params := params.Params[*reddit.SearchArguments]{}
+	params.JobType = types.RedditJob
+	params.Args = &args
+
+	body, err := json.Marshal(params)
+	if err != nil {
+		return nil, err
+	}
+	return c.doRequest(c.BaseURL+jobEndpoint, body)
 }
