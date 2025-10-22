@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/masa-finance/tee-worker/api/args/linkedin/profile"
-	"github.com/masa-finance/tee-worker/api/jobs"
+	"github.com/masa-finance/tee-worker/api/args/linkedin"
+	"github.com/masa-finance/tee-worker/api/params"
 	"github.com/masa-finance/tee-worker/api/types"
 )
 
 // SearchLinkedInWithArgsAsync searches LinkedIn with custom arguments and returns a job ID
-func (c *Client) SearchLinkedInWithArgsAsync(args profile.Arguments) (*types.ResultResponse, error) {
-	body, err := json.Marshal(jobs.LinkedInParams{
+func (c *Client) SearchLinkedInWithArgsAsync(args linkedin.ProfileArguments) (*types.ResultResponse, error) {
+	body, err := json.Marshal(params.LinkedIn{
 		JobType: types.LinkedInJob,
-		Args:    args,
+		Args:    &args,
 	})
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func (c *Client) SearchLinkedInWithArgsAsync(args profile.Arguments) (*types.Res
 
 // SearchLinkedInAsync performs a LinkedIn search job and returns a job ID
 func (c *Client) SearchLinkedInAsync(query string) (*types.ResultResponse, error) {
-	args := profile.NewArguments()
+	args := linkedin.NewProfileArguments()
 	args.Query = query
 
 	res, err := c.SearchLinkedInWithArgsAsync(args)
@@ -46,7 +46,7 @@ func (c *Client) SearchLinkedIn(query string) ([]types.Document, error) {
 }
 
 // SearchLinkedInWithArgs searches LinkedIn with custom arguments and waits for completion, returning results directly
-func (c *Client) SearchLinkedInWithArgs(args profile.Arguments) ([]types.Document, error) {
+func (c *Client) SearchLinkedInWithArgs(args linkedin.ProfileArguments) ([]types.Document, error) {
 	resp, err := c.SearchLinkedInWithArgsAsync(args)
 	if err != nil {
 		return nil, err

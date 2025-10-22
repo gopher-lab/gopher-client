@@ -4,17 +4,18 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/masa-finance/tee-worker/api/args/reddit/search"
-	"github.com/masa-finance/tee-worker/api/jobs"
+	"github.com/masa-finance/tee-worker/api/args/reddit"
+	"github.com/masa-finance/tee-worker/api/params"
 	"github.com/masa-finance/tee-worker/api/types"
 )
 
 // SearchRedditWithArgsAsync searches Reddit with custom arguments and returns a job ID
-func (c *Client) SearchRedditWithArgsAsync(args search.Arguments) (*types.ResultResponse, error) {
-	body, err := json.Marshal(jobs.RedditParams{
-		JobType: types.RedditJob,
-		Args:    args,
-	})
+func (c *Client) SearchRedditWithArgsAsync(args reddit.SearchArguments) (*types.ResultResponse, error) {
+	params := params.Params[*reddit.SearchArguments]{}
+	params.JobType = types.RedditJob
+	params.Args = &args
+
+	body, err := json.Marshal(params)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +24,7 @@ func (c *Client) SearchRedditWithArgsAsync(args search.Arguments) (*types.Result
 
 // ScrapeRedditURLAsync performs a Reddit URL scraping job and returns a job ID
 func (c *Client) ScrapeRedditURLAsync(url string, maxItems uint) (*types.ResultResponse, error) {
-	args := search.NewScrapeUrlsArguments()
+	args := reddit.NewScrapeUrlsArguments()
 	args.URLs = []string{url}
 	args.MaxItems = maxItems
 	res, err := c.SearchRedditWithArgsAsync(args)
@@ -35,7 +36,7 @@ func (c *Client) ScrapeRedditURLAsync(url string, maxItems uint) (*types.ResultR
 
 // SearchRedditPostsAsync performs a Reddit posts search job and returns a job ID
 func (c *Client) SearchRedditPostsAsync(query string, maxItems uint) (*types.ResultResponse, error) {
-	args := search.NewSearchPostsArguments()
+	args := reddit.NewSearchPostsArguments()
 	args.Queries = []string{query}
 	args.MaxItems = maxItems
 	res, err := c.SearchRedditWithArgsAsync(args)
@@ -47,7 +48,7 @@ func (c *Client) SearchRedditPostsAsync(query string, maxItems uint) (*types.Res
 
 // SearchRedditUsersAsync performs a Reddit users search job and returns a job ID
 func (c *Client) SearchRedditUsersAsync(query string, maxItems uint) (*types.ResultResponse, error) {
-	args := search.NewSearchUsersArguments()
+	args := reddit.NewSearchUsersArguments()
 	args.Queries = []string{query}
 	args.MaxItems = maxItems
 	res, err := c.SearchRedditWithArgsAsync(args)
@@ -59,7 +60,7 @@ func (c *Client) SearchRedditUsersAsync(query string, maxItems uint) (*types.Res
 
 // SearchRedditCommunitiesAsync performs a Reddit communities search job and returns a job ID
 func (c *Client) SearchRedditCommunitiesAsync(query string, maxItems uint) (*types.ResultResponse, error) {
-	args := search.NewSearchCommunitiesArguments()
+	args := reddit.NewSearchCommunitiesArguments()
 	args.Queries = []string{query}
 	args.MaxItems = maxItems
 	res, err := c.SearchRedditWithArgsAsync(args)
@@ -118,7 +119,7 @@ func (c *Client) SearchRedditCommunities(query string, maxItems uint) ([]types.D
 }
 
 // SearchRedditWithArgs searches Reddit with custom arguments and waits for completion, returning results directly
-func (c *Client) SearchRedditWithArgs(args search.Arguments) ([]types.Document, error) {
+func (c *Client) SearchRedditWithArgs(args reddit.SearchArguments) ([]types.Document, error) {
 	resp, err := c.SearchRedditWithArgsAsync(args)
 	if err != nil {
 		return nil, err

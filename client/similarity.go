@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/gopher-lab/gopher-client/log"
-	"github.com/masa-finance/tee-worker/api/jobs"
+	"github.com/masa-finance/tee-worker/api/params"
 	"github.com/masa-finance/tee-worker/api/types"
 )
 
@@ -16,7 +16,7 @@ func (c *Client) SearchSimilarity(
 	operator string,
 	maxResults int,
 ) ([]types.Document, error) {
-	requestBody, err := json.Marshal(jobs.SimilaritySearchParams{
+	requestBody, err := json.Marshal(params.SimilaritySearchParams{
 		Query:           query,
 		Keywords:        keywords,
 		Sources:         sources,

@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/masa-finance/tee-worker/api/args/twitter/search"
-	"github.com/masa-finance/tee-worker/api/jobs"
+	"github.com/masa-finance/tee-worker/api/args/twitter"
+	"github.com/masa-finance/tee-worker/api/params"
 	"github.com/masa-finance/tee-worker/api/types"
 )
 
 // SearchTwitterWithArgsAsync searches Twitter with custom arguments and returns a job ID
-func (c *Client) SearchTwitterWithArgsAsync(args search.Arguments) (*types.ResultResponse, error) {
-	body, err := json.Marshal(jobs.TwitterParams{
+func (c *Client) SearchTwitterWithArgsAsync(args twitter.SearchArguments) (*types.ResultResponse, error) {
+	body, err := json.Marshal(params.Twitter{
 		JobType: types.TwitterJob,
-		Args:    args,
+		Args:    &args,
 	})
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func (c *Client) SearchTwitterWithArgsAsync(args search.Arguments) (*types.Resul
 
 // SearchTwitterAsync performs a Twitter search job and returns a job ID
 func (c *Client) SearchTwitterAsync(query string) (*types.ResultResponse, error) {
-	args := search.NewArguments()
+	args := twitter.NewSearchArguments()
 	args.Query = query
 	res, err := c.SearchTwitterWithArgsAsync(args)
 	if err != nil {
@@ -45,7 +45,7 @@ func (c *Client) SearchTwitter(query string) ([]types.Document, error) {
 }
 
 // SearchTwitterWithArgs searches Twitter with custom arguments and waits for completion, returning results directly
-func (c *Client) SearchTwitterWithArgs(args search.Arguments) ([]types.Document, error) {
+func (c *Client) SearchTwitterWithArgs(args twitter.SearchArguments) ([]types.Document, error) {
 	resp, err := c.SearchTwitterWithArgsAsync(args)
 	if err != nil {
 		return nil, err

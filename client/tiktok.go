@@ -4,21 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/masa-finance/tee-worker/api/args/tiktok/query"
-	"github.com/masa-finance/tee-worker/api/args/tiktok/transcription"
-	"github.com/masa-finance/tee-worker/api/args/tiktok/trending"
-	"github.com/masa-finance/tee-worker/api/jobs"
+	"github.com/masa-finance/tee-worker/api/args/tiktok"
+	"github.com/masa-finance/tee-worker/api/params"
 	"github.com/masa-finance/tee-worker/api/types"
 )
 
 // TranscribeTikTokAsync performs a TikTok transcription job and returns a job ID
 func (c *Client) TranscribeTikTokAsync(url string) (*types.ResultResponse, error) {
-	args := transcription.NewArguments()
+	args := tiktok.NewTranscriptionArguments()
 	args.VideoURL = url
 
-	body, err := json.Marshal(jobs.TikTokTranscriptionParams{
+	body, err := json.Marshal(params.TikTokTranscription{
 		JobType: types.TiktokJob,
-		Args:    args,
+		Args:    &args,
 	})
 	if err != nil {
 		return nil, err
@@ -28,13 +26,13 @@ func (c *Client) TranscribeTikTokAsync(url string) (*types.ResultResponse, error
 
 // SearchTikTokAsync performs a TikTok search job and returns a job ID
 func (c *Client) SearchTikTokAsync(q string, maxItems uint) (*types.ResultResponse, error) {
-	args := query.NewArguments()
+	args := tiktok.NewQueryArguments()
 	args.Search = []string{q}
 	args.MaxItems = maxItems
 
-	body, err := json.Marshal(jobs.TikTokSearchParams{
+	body, err := json.Marshal(params.TikTokSearch{
 		JobType: types.TiktokJob,
-		Args:    args,
+		Args:    &args,
 	})
 	if err != nil {
 		return nil, err
@@ -44,13 +42,13 @@ func (c *Client) SearchTikTokAsync(q string, maxItems uint) (*types.ResultRespon
 
 // SearchTikTokTrendingAsync performs a TikTok trending search job and returns a job ID
 func (c *Client) SearchTikTokTrendingAsync(sortBy string, maxItems int) (*types.ResultResponse, error) {
-	args := trending.NewArguments()
+	args := tiktok.NewTrendingArguments()
 	args.SortBy = sortBy
 	args.MaxItems = maxItems
 
-	body, err := json.Marshal(jobs.TikTokTrendingParams{
+	body, err := json.Marshal(params.TikTokTrending{
 		JobType: types.TiktokJob,
-		Args:    args,
+		Args:    &args,
 	})
 	if err != nil {
 		return nil, err
@@ -95,10 +93,10 @@ func (c *Client) SearchTikTokTrending(sortBy string, maxItems int) ([]types.Docu
 }
 
 // SearchTikTokWithArgs searches TikTok with query arguments and waits for completion, returning results directly
-func (c *Client) SearchTikTokWithArgs(args query.Arguments) ([]types.Document, error) {
-	body, err := json.Marshal(jobs.TikTokSearchParams{
+func (c *Client) SearchTikTokWithArgs(args tiktok.QueryArguments) ([]types.Document, error) {
+	body, err := json.Marshal(params.TikTokSearch{
 		JobType: types.TiktokJob,
-		Args:    args,
+		Args:    &args,
 	})
 	if err != nil {
 		return nil, err
@@ -114,10 +112,10 @@ func (c *Client) SearchTikTokWithArgs(args query.Arguments) ([]types.Document, e
 }
 
 // SearchTikTokTrendingWithArgs searches TikTok trending with custom arguments and waits for completion, returning results directly
-func (c *Client) SearchTikTokTrendingWithArgs(args trending.Arguments) ([]types.Document, error) {
-	body, err := json.Marshal(jobs.TikTokTrendingParams{
+func (c *Client) SearchTikTokTrendingWithArgs(args tiktok.TrendingArguments) ([]types.Document, error) {
+	body, err := json.Marshal(params.TikTokTrending{
 		JobType: types.TiktokJob,
-		Args:    args,
+		Args:    &args,
 	})
 	if err != nil {
 		return nil, err
@@ -133,10 +131,10 @@ func (c *Client) SearchTikTokTrendingWithArgs(args trending.Arguments) ([]types.
 }
 
 // TranscribeTikTokWithArgs transcribes TikTok with custom arguments and waits for completion, returning results directly
-func (c *Client) TranscribeTikTokWithArgs(args transcription.Arguments) ([]types.Document, error) {
-	body, err := json.Marshal(jobs.TikTokTranscriptionParams{
+func (c *Client) TranscribeTikTokWithArgs(args tiktok.TranscriptionArguments) ([]types.Document, error) {
+	body, err := json.Marshal(params.TikTokTranscription{
 		JobType: types.TiktokJob,
-		Args:    args,
+		Args:    &args,
 	})
 	if err != nil {
 		return nil, err

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/gopher-lab/gopher-client/log"
-	"github.com/masa-finance/tee-worker/api/jobs"
+	"github.com/masa-finance/tee-worker/api/params"
 	"github.com/masa-finance/tee-worker/api/types"
 )
 
@@ -19,9 +19,9 @@ func (c *Client) SearchHybrid(
 	operator string,
 	maxResults int,
 ) ([]types.Document, error) {
-	requestBody, err := json.Marshal(jobs.HybridSearchParams{
-		TextQuery:       jobs.HybridQuery{Query: query, Weight: queryWeight},
-		SimilarityQuery: jobs.HybridQuery{Query: text, Weight: textWeight},
+	requestBody, err := json.Marshal(params.HybridSearchParams{
+		TextQuery:       params.HybridQuery{Query: query, Weight: queryWeight},
+		SimilarityQuery: params.HybridQuery{Query: text, Weight: textWeight},
 		Sources:         sources,
 		Keywords:        keywords,
 		Operator:        operator,
