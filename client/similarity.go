@@ -16,7 +16,7 @@ func (c *Client) SearchSimilarity(
 	operator string,
 	maxResults int,
 ) ([]types.Document, error) {
-	requestBody, err := json.Marshal(params.SimilaritySearchParams{
+	requestBody, err := json.Marshal(params.SimilaritySearch{
 		Query:           query,
 		Keywords:        keywords,
 		Sources:         sources,

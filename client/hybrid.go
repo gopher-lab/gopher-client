@@ -19,7 +19,7 @@ func (c *Client) SearchHybrid(
 	operator string,
 	maxResults int,
 ) ([]types.Document, error) {
-	requestBody, err := json.Marshal(params.HybridSearchParams{
+	requestBody, err := json.Marshal(params.HybridSearch{
 		TextQuery:       params.HybridQuery{Query: query, Weight: queryWeight},
 		SimilarityQuery: params.HybridQuery{Query: text, Weight: textWeight},
 		Sources:         sources,
