@@ -98,6 +98,12 @@ func (t *TwitterSearch) Run(params map[string]any) (string, error) {
 		return "", err
 	}
 
-	b, _ := json.Marshal(docs)
+	// Extract only the content field from documents
+	contents := make([]string, 0, len(docs))
+	for _, d := range docs {
+		contents = append(contents, d.Content)
+	}
+
+	b, _ := json.Marshal(contents)
 	return string(b), nil
 }

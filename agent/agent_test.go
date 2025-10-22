@@ -32,7 +32,7 @@ var _ = Describe("Agent integration", func() {
 		ag, err := agent.NewFromConfig(c)
 		Expect(err).ToNot(HaveOccurred())
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 		defer cancel()
 
 		query := "You have to find out a list of the most trending topics related to crypto and altcoins worldwide on Twitter for the last 3 days. Use the search_twitter tool."

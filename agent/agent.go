@@ -59,12 +59,12 @@ func (a *Agent) Query(ctx context.Context, query string) (*types.Output, error) 
 	improved, err := cogito.ContentReview(
 		a.llm,
 		fragment,
+		// cogito.EnableDeepContext,
+		// cogito.EnableToolReEvaluator,
+		// cogito.EnableToolReasoner,
 		cogito.WithIterations(1),
 		cogito.WithMaxAttempts(1),
-		cogito.EnableDeepContext,
-		cogito.EnableToolReEvaluator,
 		cogito.WithTools(&TwitterSearch{Client: a.c}),
-		cogito.EnableToolReasoner,
 	)
 	if err != nil {
 		return nil, err
@@ -107,7 +107,7 @@ func (a *Agent) Query(ctx context.Context, query string) (*types.Output, error) 
 	}
 
 	// Provide a timeout context for extraction
-	ctxExtract, cancel := context.WithTimeout(ctx, 30*time.Second)
+	ctxExtract, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
 
 	if err := result.ExtractStructure(ctxExtract, a.llm, s); err != nil {
