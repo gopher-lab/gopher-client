@@ -102,20 +102,20 @@ results, err := client.SearchTwitter("golang programming")
 ### 👽 Reddit Operations
 ```go
 // Scrape Reddit URL (async)
-job, err := client.ScrapeRedditURLAsync("https://reddit.com/r/golang", 10)
+job, err := client.ScrapeRedditURLAsync("https://reddit.com/r/golang")
 fmt.Printf("Job ID: %s\n", job.UUID)
 
 // Scrape Reddit URL (sync)
-results, err := client.ScrapeRedditURL("https://reddit.com/r/golang", 10)
+results, err := client.ScrapeRedditURL("https://reddit.com/r/golang")
 
 // Search Reddit posts (sync)
-results, err := client.SearchRedditPosts("golang", 10)
+results, err := client.SearchRedditPosts("golang")
 
 // Search Reddit users (sync)
-results, err := client.SearchRedditUsers("username", 5)
+results, err := client.SearchRedditUsers("username")
 
 // Search Reddit communities (sync)
-results, err := client.SearchRedditCommunities("golang", 10)
+results, err := client.SearchRedditCommunities("golang")
 ```
 
 ### 💼 LinkedIn Search
@@ -131,18 +131,18 @@ results, err := client.SearchLinkedIn("software engineer")
 ### 🎵 TikTok Operations
 ```go
 // Submit jobs (async)
-job, err := client.SearchTikTokAsync("golang tutorial", 10)
+job, err := client.SearchTikTokAsync("golang tutorial")
 fmt.Printf("Job ID: %s\n", job.UUID)
 
-job, err := client.SearchTikTokTrendingAsync("views", 20)
+job, err := client.SearchTikTokTrendingAsync("views")
 fmt.Printf("Job ID: %s\n", job.UUID)
 
 job, err := client.TranscribeTikTokAsync("https://tiktok.com/@user/video/123")
 fmt.Printf("Job ID: %s\n", job.UUID)
 
 // Get results directly (sync)
-results, err := client.SearchTikTok("golang tutorial", 10)
-results, err := client.SearchTikTokTrending("views", 20)
+results, err := client.SearchTikTok("golang tutorial")
+results, err := client.SearchTikTokTrending("views")
 results, err := client.TranscribeTikTok("https://tiktok.com/@user/video/123")
 ```
 
