@@ -6,15 +6,23 @@ import (
 
 	"github.com/gopher-lab/gopher-client/log"
 
-	"github.com/gopher-lab/gopher-client/types"
+	"time"
+
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 )
 
+type Config struct {
+	BaseUrl     string        `envconfig:"GOPHER_CLIENT_URL" default:"https://data.gopher-ai.com/api"`
+	Timeout     time.Duration `envconfig:"GOPHER_CLIENT_TIMEOUT" default:"60s"`
+	Token       string        `envconfig:"GOPHER_CLIENT_TOKEN"`
+	OpenAIToken string        `envconfig:"OPENAI_TOKEN"`
+}
+
 // LoadConfig loads the Config from environment variables.
 // It first attempts to load from a .env file, then falls back to system environment variables.
 // The .env file loading is optional - if the file doesn't exist, it will continue without error.
-func LoadConfig() (*types.Config, error) {
+func LoadConfig() (*Config, error) {
 	// Try to load .env file (optional)
 	// Look for .env file in current directory and parent directories
 	envFiles := []string{".env", "../.env", "../../.env"}
@@ -49,7 +57,7 @@ func LoadConfig() (*types.Config, error) {
 		log.Warn("Could not find .env file in current or parent directories")
 	}
 
-	var config types.Config
+	var config Config
 	if err := envconfig.Process("", &config); err != nil {
 		return nil, err
 	}
@@ -59,7 +67,7 @@ func LoadConfig() (*types.Config, error) {
 
 // MustLoadConfig loads the Config and panics if there's an error.
 // Use this when you want the application to fail fast if configuration can't be loaded.
-func MustLoadConfig() *types.Config {
+func MustLoadConfig() *Config {
 	config, err := LoadConfig()
 	if err != nil {
 		log.Warn("Failed to load search configuration", "error", err)

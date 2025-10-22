@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/gopher-lab/gopher-client/config"
-	"github.com/gopher-lab/gopher-client/types"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -138,7 +137,7 @@ GOPHER_CLIENT_TOKEN=staging-token-456`
 	Describe("Config struct", func() {
 		Context("when manually instantiated", func() {
 			It("should allow field access and modification", func() {
-				cfg := &types.Config{
+				cfg := &config.Config{
 					BaseUrl: "https://custom.example.com",
 					Token:   "custom-token-abc",
 				}

@@ -38,7 +38,7 @@ func NewClient(baseURL string, token string) *Client {
 func NewClientFromConfig() (*Client, error) {
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		return nil, fmt.Errorf("failed to load config: %w", err)
+		return nil, err
 	}
 	opts, _ := NewOptions(Timeout(cfg.Timeout))
 	return &Client{
