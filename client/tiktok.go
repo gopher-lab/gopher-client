@@ -25,10 +25,9 @@ func (c *Client) TranscribeTikTokAsync(url string) (*types.ResultResponse, error
 }
 
 // SearchTikTokAsync performs a TikTok search job and returns a job ID
-func (c *Client) SearchTikTokAsync(q string, maxItems uint) (*types.ResultResponse, error) {
+func (c *Client) SearchTikTokAsync(query string) (*types.ResultResponse, error) {
 	args := tiktok.NewQueryArguments()
-	args.Search = []string{q}
-	args.MaxItems = maxItems
+	args.Search = []string{query}
 
 	body, err := json.Marshal(params.TikTokSearch{
 		JobType: types.TiktokJob,
@@ -41,10 +40,9 @@ func (c *Client) SearchTikTokAsync(q string, maxItems uint) (*types.ResultRespon
 }
 
 // SearchTikTokTrendingAsync performs a TikTok trending search job and returns a job ID
-func (c *Client) SearchTikTokTrendingAsync(sortBy string, maxItems int) (*types.ResultResponse, error) {
+func (c *Client) SearchTikTokTrendingAsync(sortBy string) (*types.ResultResponse, error) {
 	args := tiktok.NewTrendingArguments()
 	args.SortBy = sortBy
-	args.MaxItems = maxItems
 
 	body, err := json.Marshal(params.TikTokTrending{
 		JobType: types.TiktokJob,
@@ -69,8 +67,8 @@ func (c *Client) TranscribeTikTok(url string) ([]types.Document, error) {
 }
 
 // SearchTikTok performs a TikTok search and waits for completion, returning results directly
-func (c *Client) SearchTikTok(q string, maxItems uint) ([]types.Document, error) {
-	resp, err := c.SearchTikTokAsync(q, maxItems)
+func (c *Client) SearchTikTok(query string) ([]types.Document, error) {
+	resp, err := c.SearchTikTokAsync(query)
 	if err != nil {
 		return nil, err
 	}
@@ -81,8 +79,8 @@ func (c *Client) SearchTikTok(q string, maxItems uint) ([]types.Document, error)
 }
 
 // SearchTikTokTrending performs a TikTok trending search and waits for completion, returning results directly
-func (c *Client) SearchTikTokTrending(sortBy string, maxItems int) ([]types.Document, error) {
-	resp, err := c.SearchTikTokTrendingAsync(sortBy, maxItems)
+func (c *Client) SearchTikTokTrending(sortBy string) ([]types.Document, error) {
+	resp, err := c.SearchTikTokTrendingAsync(sortBy)
 	if err != nil {
 		return nil, err
 	}

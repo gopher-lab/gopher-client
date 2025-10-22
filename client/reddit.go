@@ -23,10 +23,9 @@ func (c *Client) SearchRedditWithArgsAsync(args reddit.SearchArguments) (*types.
 }
 
 // ScrapeRedditURLAsync performs a Reddit URL scraping job and returns a job ID
-func (c *Client) ScrapeRedditURLAsync(url string, maxItems uint) (*types.ResultResponse, error) {
+func (c *Client) ScrapeRedditURLAsync(url string) (*types.ResultResponse, error) {
 	args := reddit.NewScrapeUrlsArguments()
 	args.URLs = []string{url}
-	args.MaxItems = maxItems
 	res, err := c.SearchRedditWithArgsAsync(args)
 	if err != nil {
 		return nil, err
@@ -35,10 +34,9 @@ func (c *Client) ScrapeRedditURLAsync(url string, maxItems uint) (*types.ResultR
 }
 
 // SearchRedditPostsAsync performs a Reddit posts search job and returns a job ID
-func (c *Client) SearchRedditPostsAsync(query string, maxItems uint) (*types.ResultResponse, error) {
+func (c *Client) SearchRedditPostsAsync(query string) (*types.ResultResponse, error) {
 	args := reddit.NewSearchPostsArguments()
 	args.Queries = []string{query}
-	args.MaxItems = maxItems
 	res, err := c.SearchRedditWithArgsAsync(args)
 	if err != nil {
 		return nil, err
@@ -47,10 +45,9 @@ func (c *Client) SearchRedditPostsAsync(query string, maxItems uint) (*types.Res
 }
 
 // SearchRedditUsersAsync performs a Reddit users search job and returns a job ID
-func (c *Client) SearchRedditUsersAsync(query string, maxItems uint) (*types.ResultResponse, error) {
+func (c *Client) SearchRedditUsersAsync(query string) (*types.ResultResponse, error) {
 	args := reddit.NewSearchUsersArguments()
 	args.Queries = []string{query}
-	args.MaxItems = maxItems
 	res, err := c.SearchRedditWithArgsAsync(args)
 	if err != nil {
 		return nil, err
@@ -59,10 +56,9 @@ func (c *Client) SearchRedditUsersAsync(query string, maxItems uint) (*types.Res
 }
 
 // SearchRedditCommunitiesAsync performs a Reddit communities search job and returns a job ID
-func (c *Client) SearchRedditCommunitiesAsync(query string, maxItems uint) (*types.ResultResponse, error) {
+func (c *Client) SearchRedditCommunitiesAsync(query string) (*types.ResultResponse, error) {
 	args := reddit.NewSearchCommunitiesArguments()
 	args.Queries = []string{query}
-	args.MaxItems = maxItems
 	res, err := c.SearchRedditWithArgsAsync(args)
 	if err != nil {
 		return nil, err
@@ -71,8 +67,8 @@ func (c *Client) SearchRedditCommunitiesAsync(query string, maxItems uint) (*typ
 }
 
 // ScrapeRedditURL performs a Reddit URL scraping and waits for completion, returning results directly
-func (c *Client) ScrapeRedditURL(url string, maxItems uint) ([]types.Document, error) {
-	resp, err := c.ScrapeRedditURLAsync(url, maxItems)
+func (c *Client) ScrapeRedditURL(url string) ([]types.Document, error) {
+	resp, err := c.ScrapeRedditURLAsync(url)
 	if err != nil {
 		return nil, err
 	}
@@ -83,8 +79,8 @@ func (c *Client) ScrapeRedditURL(url string, maxItems uint) ([]types.Document, e
 }
 
 // SearchRedditPosts performs a Reddit posts search and waits for completion, returning results directly
-func (c *Client) SearchRedditPosts(query string, maxItems uint) ([]types.Document, error) {
-	resp, err := c.SearchRedditPostsAsync(query, maxItems)
+func (c *Client) SearchRedditPosts(query string) ([]types.Document, error) {
+	resp, err := c.SearchRedditPostsAsync(query)
 	if err != nil {
 		return nil, err
 	}
@@ -95,8 +91,8 @@ func (c *Client) SearchRedditPosts(query string, maxItems uint) ([]types.Documen
 }
 
 // SearchRedditUsers performs a Reddit users search and waits for completion, returning results directly
-func (c *Client) SearchRedditUsers(query string, maxItems uint) ([]types.Document, error) {
-	resp, err := c.SearchRedditUsersAsync(query, maxItems)
+func (c *Client) SearchRedditUsers(query string) ([]types.Document, error) {
+	resp, err := c.SearchRedditUsersAsync(query)
 	if err != nil {
 		return nil, err
 	}
@@ -107,8 +103,8 @@ func (c *Client) SearchRedditUsers(query string, maxItems uint) ([]types.Documen
 }
 
 // SearchRedditCommunities performs a Reddit communities search and waits for completion, returning results directly
-func (c *Client) SearchRedditCommunities(query string, maxItems uint) ([]types.Document, error) {
-	resp, err := c.SearchRedditCommunitiesAsync(query, maxItems)
+func (c *Client) SearchRedditCommunities(query string) ([]types.Document, error) {
+	resp, err := c.SearchRedditCommunitiesAsync(query)
 	if err != nil {
 		return nil, err
 	}
