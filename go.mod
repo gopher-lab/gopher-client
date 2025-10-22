@@ -3,7 +3,7 @@ module github.com/gopher-lab/gopher-client
 go 1.24.6
 
 // FIXME: update to release
-require github.com/masa-finance/tee-worker v1.8.1-0.20251022003232-45cce1bb8df4
+require github.com/masa-finance/tee-worker v1.8.1-0.20251022004526-01e2b65decc6
 
 require (
 	github.com/joho/godotenv v1.5.1
