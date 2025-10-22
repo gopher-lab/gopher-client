@@ -25,12 +25,11 @@ type Client struct {
 
 // NewClient creates a new API client
 func NewClient(baseURL string, token string) *Client {
-	// preserve existing behavior: 60s timeout
-	opts, _ := NewOptions(Timeout(60 * time.Second))
+	opts, _ := NewOptions()
 	return &Client{
 		BaseURL:    baseURL,
 		Token:      token,
-		Timeout:    60 * time.Second,
+		Timeout:    opts.Timeout,
 		HTTPClient: opts.HttpClient,
 	}
 }
