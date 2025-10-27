@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gopher-lab/gopher-client/config"
-	"github.com/masa-finance/tee-worker/api/types"
+    "github.com/masa-finance/tee-worker/v2/api/types"
 )
 
 // note, single endpoint for all jobs, supported by indexer and data app for acceptance tests

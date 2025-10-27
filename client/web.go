@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/masa-finance/tee-worker/api/args/web"
-	"github.com/masa-finance/tee-worker/api/params"
-	"github.com/masa-finance/tee-worker/api/types"
+    "github.com/masa-finance/tee-worker/v2/api/args/web"
+    "github.com/masa-finance/tee-worker/v2/api/params"
+    "github.com/masa-finance/tee-worker/v2/api/types"
 )
 
 // ScrapeWebWithArgsAsync scrapes a web scraper with custom arguments and returns a job ID
