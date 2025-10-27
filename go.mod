@@ -5,7 +5,7 @@ go 1.24.6
 require (
 	github.com/joho/godotenv v1.5.1
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/masa-finance/tee-worker/v2 v2.0.0
+	github.com/masa-finance/tee-worker/v2 v2.0.1
 	github.com/mudler/cogito v0.3.3
 	github.com/onsi/ginkgo/v2 v2.26.0
 	github.com/onsi/gomega v1.38.2
@@ -42,5 +42,3 @@ require (
 	golang.org/x/text v0.30.0 // indirect
 	golang.org/x/tools v0.37.0 // indirect
 )
-
-replace github.com/masa-finance/tee-worker/v2 => /home/grant/tee-worker
