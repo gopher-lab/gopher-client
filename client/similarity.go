@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/gopher-lab/gopher-client/log"
-	"github.com/masa-finance/tee-worker/api/params"
-	"github.com/masa-finance/tee-worker/api/types"
+    "github.com/masa-finance/tee-worker/v2/api/params"
+    "github.com/masa-finance/tee-worker/v2/api/types"
 )
 
 // SearchSimilarity performs a similarity search and returns results directly

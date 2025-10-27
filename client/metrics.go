@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gopher-lab/gopher-client/log"
-	"github.com/masa-finance/tee-worker/api/types"
+    "github.com/masa-finance/tee-worker/v2/api/types"
 )
 
 func (c *Client) GetAllMetrics(refresh bool) ([]types.CollectionStats, error) {

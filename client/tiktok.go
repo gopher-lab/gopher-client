@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/masa-finance/tee-worker/api/args/tiktok"
-	"github.com/masa-finance/tee-worker/api/params"
-	"github.com/masa-finance/tee-worker/api/types"
+    "github.com/masa-finance/tee-worker/v2/api/args/tiktok"
+    "github.com/masa-finance/tee-worker/v2/api/params"
+    "github.com/masa-finance/tee-worker/v2/api/types"
 )
 
 // TranscribeTikTok performs a TikTok transcription and waits for completion, returning results directly

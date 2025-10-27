@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/gopher-lab/gopher-client/client"
-	"github.com/masa-finance/tee-worker/api/args/twitter"
+    "github.com/masa-finance/tee-worker/v2/api/args/twitter"
 	openai "github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
 )

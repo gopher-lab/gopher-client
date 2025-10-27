@@ -85,8 +85,8 @@ github.com/magiconair/properties v1.8.10 h1:s31yESBquKXCV9a/ScB3ESkOjUYYv+X0rg8S
 github.com/magiconair/properties v1.8.10/go.mod h1:Dhd985XPs7jluiymwWYZ0G4Z61jb3vdS329zhj2hYo0=
 github.com/maruel/natural v1.1.1 h1:Hja7XhhmvEFhcByqDoHz9QZbkWey+COd9xWfCfn1ioo=
 github.com/maruel/natural v1.1.1/go.mod h1:v+Rfd79xlw1AgVBjbO0BEQmptqb5HvL/k9GRHB7ZKEg=
-github.com/masa-finance/tee-worker v1.8.1-0.20251022010501-ad8571b04510 h1:ClaIPRM92PRYcnHB0abgJxCY3jHsiNES+q7BILdYHSE=
-github.com/masa-finance/tee-worker v1.8.1-0.20251022010501-ad8571b04510/go.mod h1:VJ/bTjWBnwN5m3hwAI0RzpDHtvDYo4h53bUjZRd0ltU=
+github.com/masa-finance/tee-worker/v2 v2.0.1 h1:slBs/++SaNldV0vFL5IpAZSyKKd0HYPsyrr7FWFjPgg=
+github.com/masa-finance/tee-worker/v2 v2.0.1/go.mod h1:+xlwtrj+bQDSf4jsPlJAMPvqvYrGS3ItHG0J1WRXweY=
 github.com/mfridman/tparse v0.18.0 h1:wh6dzOKaIwkUGyKgOntDW4liXSo37qg5AXbIhkMV3vE=
 github.com/mfridman/tparse v0.18.0/go.mod h1:gEvqZTuCgEhPbYk/2lS3Kcxg1GmTxxU7kTC8DvP0i/A=
 github.com/mitchellh/copystructure v1.2.0 h1:vpKXTN4ewci03Vljg/q9QvCGUDttBOGBIa15WveJJGw=

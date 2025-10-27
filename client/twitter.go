@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/masa-finance/tee-worker/api/args/twitter"
-	"github.com/masa-finance/tee-worker/api/params"
-	"github.com/masa-finance/tee-worker/api/types"
+    "github.com/masa-finance/tee-worker/v2/api/args/twitter"
+    "github.com/masa-finance/tee-worker/v2/api/params"
+    "github.com/masa-finance/tee-worker/v2/api/types"
 )
 
 // SearchTwitterWithArgsAsync searches Twitter with custom arguments and returns a job ID
