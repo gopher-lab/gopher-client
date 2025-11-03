@@ -170,8 +170,8 @@ func (a *Agent) Query(ctx context.Context, query string, opts ...QueryOption) (*
 		a.llm,
 		fragment,
 		cogito.WithContext(ctx),
-		cogito.WithIterations(3),    // Increase iterations to allow multiple tool calls
-		cogito.WithMaxAttempts(3),   // Allow multiple attempts
+		cogito.WithIterations(3),    // Allow multiple tool calls in sequence
+		cogito.WithMaxAttempts(3),   // Allow multiple attempts for tool selection
 		cogito.WithForceReasoning(), // Force LLM to reason about tool usage
 		cogito.WithTools(&TwitterSearch{Client: a.Client}, &WebSearch{Client: a.Client}),
 	)

@@ -43,3 +43,5 @@ require (
 	golang.org/x/text v0.30.0 // indirect
 	golang.org/x/tools v0.37.0 // indirect
 )
+
+replace github.com/mudler/cogito => github.com/grantdfoster/cogito v0.5.1-0.20251103175146-d2e5d548359f
