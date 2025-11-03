@@ -153,7 +153,8 @@ func (a *Agent) Query(ctx context.Context, query string, opts ...QueryOption) (*
 	}
 
 	// Build full prompt with query, instructions, and suffix
-	fullPrompt := query
+	// Make it explicit that tools MUST be used
+	fullPrompt := query + "\n\nIMPORTANT: You MUST use the available tools (search_twitter and search_web) to gather data. Do not provide an answer without using these tools first."
 	if options.Instructions != "" {
 		fullPrompt += "\n\n" + options.Instructions
 	}
@@ -169,8 +170,9 @@ func (a *Agent) Query(ctx context.Context, query string, opts ...QueryOption) (*
 		a.llm,
 		fragment,
 		cogito.WithContext(ctx),
-		cogito.WithIterations(1),
-		cogito.WithMaxAttempts(1),
+		cogito.WithIterations(3),    // Increase iterations to allow multiple tool calls
+		cogito.WithMaxAttempts(3),   // Allow multiple attempts
+		cogito.WithForceReasoning(), // Force LLM to reason about tool usage
 		cogito.WithTools(&TwitterSearch{Client: a.Client}, &WebSearch{Client: a.Client}),
 	)
 	if err != nil {
