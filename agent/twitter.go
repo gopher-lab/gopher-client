@@ -77,9 +77,9 @@ func (t *TwitterSearch) Tool() openai.Tool {
 	}
 }
 
-// Run executes the tool. Signature follows Cogito's Tool interface expectations.
+// Execute executes the tool. Signature follows Cogito's ToolDefinitionInterface expectations.
 // Expects params to include either {"query": "..."} or raw query under a heuristic.
-func (t *TwitterSearch) Run(params map[string]any) (string, error) {
+func (t *TwitterSearch) Execute(params map[string]any) (string, error) {
 	var query string
 	if q, ok := params["query"].(string); ok {
 		query = q
