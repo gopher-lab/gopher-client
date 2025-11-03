@@ -164,12 +164,11 @@ func (a *Agent) Query(ctx context.Context, query string, opts ...QueryOption) (*
 	fragment := cogito.NewEmptyFragment().
 		AddMessage("user", fullPrompt)
 
-	improved, err := cogito.ContentReview(
+	// Execute tools with the LLM
+	improved, err := cogito.ExecuteTools(
 		a.llm,
 		fragment,
-		// cogito.EnableDeepContext,
-		// cogito.EnableToolReEvaluator,
-		// cogito.EnableToolReasoner,
+		cogito.WithContext(ctx),
 		cogito.WithIterations(1),
 		cogito.WithMaxAttempts(1),
 		cogito.WithTools(&TwitterSearch{Client: a.Client}, &WebSearch{Client: a.Client}),
