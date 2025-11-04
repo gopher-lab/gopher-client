@@ -12,7 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
     - name: Restore cached cookies
       id: cache-cookies-restore
       uses: actions/cache/restore@v4
@@ -21,6 +25,11 @@ jobs:
           cookies
         key: ${{ runner.os }}-cookies
     - name: Run tests
+      env:
+        OPENAI_TOKEN: ${{ secrets.OPENAI_TOKEN }}
+        GOPHER_CLIENT_TOKEN: ${{ secrets.GOPHER_CLIENT_TOKEN }}
+        GOPHER_CLIENT_URL: ${{ secrets.GOPHER_CLIENT_URL }}
+        GOPHER_CLIENT_TIMEOUT: ${{ secrets.GOPHER_CLIENT_TIMEOUT }}
       run: make test
 
   ready-to-merge:
