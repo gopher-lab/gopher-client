@@ -40,8 +40,6 @@ var _ = Describe("Agent integration", func() {
 		// Verify we got multiple topics (at least Bitcoin and Ethereum)
 		Expect(out.Assets).ToNot(BeEmpty(), "Expected at least one asset in the output")
 
-		fmt.Println("--------------------------------")
 		fmt.Println(prettyPrint(out.Assets))
-
 	})
 })
