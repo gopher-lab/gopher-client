@@ -44,5 +44,5 @@ require (
 	golang.org/x/tools v0.37.0 // indirect
 )
 
-// FIXME: update to latest release
-replace github.com/mudler/cogito => ../cogito
+// Using specific commit from grantdfoster/cogito fork
+replace github.com/mudler/cogito => github.com/grantdfoster/cogito v0.0.0-20251104184711-4b65f4d0640a

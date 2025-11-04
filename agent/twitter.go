@@ -10,7 +10,7 @@ import (
 )
 
 // TwitterQueryInstructions contains long-form guidance and examples for constructing Twitter queries.
-// If no date range is specified by the user, searches should consider the last 7 days.
+// If no date range is specified by the user, searches should consider the last 1 day.
 const TwitterQueryInstructions = `
 watching now 	containing both "watching" and "now". This is the default operator.
 "happy hour" 	containing the exact phrase "happy hour".
@@ -21,17 +21,13 @@ from:interior 	sent from Twitter account "interior". CRITICAL: NO SPACE after 'f
 to:NASA 	a Tweet authored in reply to Twitter account "NASA".
 @NASA 	mentioning Twitter account "NASA".
 superhero since:2015-12-21 	containing "superhero" and sent since date "2015-12-21" (year-month-day).
-puppy until:2015-12-21 	containing "puppy" and sent before the date "2015-12-21".
 
-To search for the same day, you must subtract a day between since and until:
-altcoin or bitcoin :) since:2025-03-23 until:2025-03-24
-
-If no date range is specified, default to the last 1 day.
+If no date range is specified, default to the last 1 day (use since:YYYY-MM-DD format, typically one day before today).
 
 CORRECT EXAMPLES:
-- from:JamesWynnReal (BTC OR Bitcoin OR ETH OR Ethereum) since:2025-11-03 until:2025-11-04
-- from:CryptoWendyO #BTC OR #ETH since:2025-11-03 until:2025-11-04
-- from:VitalikButerin (ethereum OR ETH) since:2025-11-03 until:2025-11-04
+- from:JamesWynnReal (BTC OR Bitcoin OR ETH OR Ethereum) since:2025-11-03
+- from:CryptoWendyO #BTC OR #ETH since:2025-11-03
+- from:VitalikButerin (ethereum OR ETH) since:2025-11-03
 
 INCORRECT (DO NOT USE SPACES AFTER from:):
 - from: JamesWynnReal (WRONG - has space after from:)
@@ -48,7 +44,7 @@ func (t *TwitterSearch) Name() string {
 }
 
 func (t *TwitterSearch) Description() string {
-	return "Search Twitter using the provided query. Include operators, since/until. Defaults to last 1 day if none provided. CRITICAL: Query ONLY 1 account per search using format 'from:username' with NO SPACE after 'from:' (e.g., 'from:JamesWynnReal', NOT 'from: JamesWynnReal'). Randomly sample accounts - do not exhaustively query all accounts. Use hashtags and keywords like '#BTC OR #ETH OR bitcoin OR ethereum' to find relevant tweets."
+	return "Search Twitter using the provided query. Include operators like 'since:YYYY-MM-DD' (typically one day before today). Defaults to last 1 day if none provided. CRITICAL: Query ONLY 1 account per search using format 'from:username' with NO SPACE after 'from:' (e.g., 'from:JamesWynnReal', NOT 'from: JamesWynnReal'). Randomly sample accounts - do not exhaustively query all accounts. Use hashtags and keywords like '#BTC OR #ETH OR bitcoin OR ethereum' to find relevant tweets."
 }
 
 // Tool describes the tool for the underlying LLM provider (OpenAI-compatible)
@@ -61,7 +57,7 @@ func (t *TwitterSearch) Tool() openai.Tool {
 			Parameters: jsonschema.Definition{
 				Type: jsonschema.Object,
 				Properties: map[string]jsonschema.Definition{
-					"query": {Type: jsonschema.String, Description: "Twitter advanced search query. CRITICAL: Use 'from:username' format with NO SPACE after 'from:' (e.g., 'from:JamesWynnReal (BTC OR Bitcoin)', NOT 'from: JamesWynnReal'). Include operators like since/until, hashtags (#BTC), and keywords."},
+					"query": {Type: jsonschema.String, Description: "Twitter advanced search query. CRITICAL: Use 'from:username' format with NO SPACE after 'from:' (e.g., 'from:JamesWynnReal (BTC OR Bitcoin)', NOT 'from: JamesWynnReal'). Include operators like 'since:YYYY-MM-DD' (typically one day before today), hashtags (#BTC), and keywords."},
 				},
 				Required: []string{"query"},
 			},

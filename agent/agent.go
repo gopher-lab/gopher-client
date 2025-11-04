@@ -37,7 +37,7 @@ IMPORTANT: You must attempt to gather data from ALL available sources, even if s
   - DO NOT exhaustively query all accounts - a random sample is sufficient
   - Query format: 'from:username (BTC OR Bitcoin OR ETH OR Ethereum OR SOL OR Solana)' - NO SPACE after 'from:' (e.g., 'from:JamesWynnReal', NOT 'from: JamesWynnReal')
   - Use hashtags and keywords: '#BTC OR #ETH OR bitcoin OR ethereum'
-  - Example correct query: 'from:JamesWynnReal (BTC OR Bitcoin OR ETH OR Ethereum) since:2025-11-03 until:2025-11-04'
+  - Example correct query: 'from:JamesWynnReal (BTC OR Bitcoin OR ETH OR Ethereum) since:2025-11-03'
 - Continue with remaining sources even if earlier sources fail
 - Partial data is acceptable - gather what you can from each source
 - Use multiple iterations to systematically collect data from all sources before synthesizing results
