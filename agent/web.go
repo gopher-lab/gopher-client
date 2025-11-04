@@ -2,7 +2,6 @@ package agent
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/gopher-lab/gopher-client/client"
 	"github.com/masa-finance/tee-worker/v2/api/args/web"
@@ -20,7 +19,7 @@ func (t *WebSearch) Name() string {
 }
 
 func (t *WebSearch) Description() string {
-	return "Web search using the provided url"
+	return "Web search using the provided url. Call this tool once per URL - execute multiple calls sequentially to fetch multiple URLs."
 }
 
 // Tool describes the tool for the underlying LLM provider (OpenAI-compatible)
@@ -57,12 +56,16 @@ func (t *WebSearch) Execute(params map[string]any) (string, error) {
 
 	docs, err := t.Client.ScrapeWebWithArgs(args)
 	if err != nil {
-		// If this is a timeout error, return a user-friendly message that the framework can use
-		// The framework will convert this to a result string and continue execution
-		if isTimeoutError(err) {
-			return "", fmt.Errorf("web search timed out for URL %s: %v", url, err)
+		// Return error as a structured result string so the LLM can see what happened
+		// This allows the agent to continue with partial data
+		errorResult := map[string]any{
+			"error":     true,
+			"url":       url,
+			"error_msg": err.Error(),
+			"documents": []any{},
 		}
-		return "", err
+		b, _ := json.Marshal(errorResult)
+		return string(b), nil
 	}
 
 	// Return full documents - lean structure with useful metadata (title, canonicalUrl, markdown, etc.)

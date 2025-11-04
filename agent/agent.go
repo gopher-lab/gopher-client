@@ -3,7 +3,6 @@ package agent
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/mudler/cogito"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/gopher-lab/gopher-client/client"
 	"github.com/gopher-lab/gopher-client/config"
+	"github.com/gopher-lab/gopher-client/log"
 	"github.com/gopher-lab/gopher-client/types"
 )
 
@@ -27,7 +27,21 @@ var (
 const (
 	DefaultModel        = "gpt-5-nano"
 	DefaultOpenAIApiUrl = "https://api.openai.com/v1"
-	DefaultPromptSuffix = "If no date range is specified, search the last 7 days."
+	DefaultPromptSuffix = "If no date range is specified, search the last 1 day"
+	// DefaultDataCollectionInstructions provides explicit guidance about trying all sources
+	DefaultDataCollectionInstructions = `
+IMPORTANT: You must attempt to gather data from ALL available sources, even if some fail.
+- Try ALL websites provided, even if some URLs timeout or return errors
+- Execute Twitter searches for sentiment analysis, but IMPORTANT: Randomly sample Twitter accounts and query ONLY 1 account per search
+  - Randomly select 1 account from the provided list for each search
+  - DO NOT exhaustively query all accounts - a random sample is sufficient
+  - Query format: 'from:username (BTC OR Bitcoin OR ETH OR Ethereum OR SOL OR Solana)' - NO SPACE after 'from:' (e.g., 'from:JamesWynnReal', NOT 'from: JamesWynnReal')
+  - Use hashtags and keywords: '#BTC OR #ETH OR bitcoin OR ethereum'
+  - Example correct query: 'from:JamesWynnReal (BTC OR Bitcoin OR ETH OR Ethereum) since:2025-11-03 until:2025-11-04'
+- Continue with remaining sources even if earlier sources fail
+- Partial data is acceptable - gather what you can from each source
+- Use multiple iterations to systematically collect data from all sources before synthesizing results
+`
 )
 
 // QueryOptions configures the behavior of the Query method
@@ -84,7 +98,7 @@ func DefaultSchema() jsonschema.Definition {
 					Properties: map[string]jsonschema.Definition{
 						"asset":     {Type: jsonschema.String, Description: "Asset name"},
 						"reasoning": {Type: jsonschema.String, Description: "Brief reasoning about the sentiment of the asset"},
-						"sentiment": {Type: jsonschema.Integer, Description: "Numeric sentiment score from 1-100, where 100 is the most bullish and 1 is the most bearish"},
+						"sentiment": {Type: jsonschema.Integer, Description: "Numeric sentiment score from 0-100. Scale: 0 = most bearish, 50 = neutral, 100 = most bullish. Each asset should have a distinct score based on its unique data and sentiment signals."},
 					},
 					Required: []string{"asset", "reasoning", "sentiment"},
 				},
@@ -96,7 +110,7 @@ func DefaultSchema() jsonschema.Definition {
 
 // DefaultFinalPrompt returns the default final prompt instruction
 func DefaultFinalPrompt() string {
-	return "Return now only a JSON object with fields that match the supplied schema."
+	return "Return now only a JSON object with fields that match the supplied schema. IMPORTANT: Each asset must have a distinct sentiment score based on its unique data and signals - do not use the same sentiment value for different assets. Analyze each asset independently."
 }
 
 // New creates a new Agent with the provided OpenAI token and model. Model defaults to gpt-5-nano.
@@ -154,6 +168,7 @@ func (a *Agent) Query(ctx context.Context, query string, opts ...QueryOption) (*
 
 	// Build full prompt with query, instructions, and suffix
 	fullPrompt := query
+	fullPrompt += "\n\n" + DefaultDataCollectionInstructions
 	if options.Instructions != "" {
 		fullPrompt += "\n\n" + options.Instructions
 	}
@@ -169,8 +184,8 @@ func (a *Agent) Query(ctx context.Context, query string, opts ...QueryOption) (*
 		a.llm,
 		fragment,
 		cogito.WithContext(ctx),
-		cogito.WithIterations(2),    // Allow multiple tool calls in sequence
-		cogito.WithMaxAttempts(2),   // Allow multiple attempts for tool selection
+		cogito.WithIterations(3),    // Reduced for faster testing (was 10)
+		cogito.WithMaxAttempts(1),   // Allow multiple attempts for tool selection
 		cogito.WithForceReasoning(), // Force LLM to reason about tool usage
 		cogito.WithTools(&WebSearch{Client: a.Client}, &TwitterSearch{Client: a.Client}),
 	)
@@ -182,11 +197,6 @@ func (a *Agent) Query(ctx context.Context, query string, opts ...QueryOption) (*
 	result, err := a.llm.Ask(ctx, improved.AddMessage("user", options.FinalPrompt))
 	if err != nil {
 		return nil, err
-	}
-
-	// Log the raw LLM response for debugging
-	if lastMsg := result.LastMessage(); lastMsg != nil {
-		fmt.Printf("DEBUG: LLM response before extraction: %s\n", lastMsg.Content)
 	}
 
 	out := &types.Output{}
@@ -201,16 +211,7 @@ func (a *Agent) Query(ctx context.Context, query string, opts ...QueryOption) (*
 	defer cancel()
 
 	if err := result.ExtractStructure(ctxExtract, a.llm, s); err != nil {
-		// If extraction fails, still return what we have (might be partial data)
-		// Log the error but don't fail completely - we might have some data
-		fmt.Printf("DEBUG: Extraction error (but returning partial results): %v\n", err)
-		// Continue to return out even if extraction failed - it might have partial data
-	}
-
-	// Check if we got any data
-	if len(out.Assets) == 0 {
-		// If no topics extracted, log this for debugging
-		fmt.Printf("DEBUG: No topics extracted. Tools called: %d\n", len(improved.Status.ToolsCalled))
+		log.Error("Extraction error", err)
 	}
 
 	return out, nil

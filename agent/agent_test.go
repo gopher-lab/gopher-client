@@ -29,7 +29,7 @@ var _ = Describe("Agent integration", func() {
 		ag, err := agent.NewAgentFromConfig()
 		Expect(err).ToNot(HaveOccurred())
 
-		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 		defer cancel()
 
 		query := fmt.Sprintf("use all available tools to determine the market sentiment of the following assets: %s, using the following websites: %s, and the following twitter accounts: %s", strings.Join(agent.Assets, ", "), strings.Join(agent.Websites, ", "), strings.Join(agent.Kols, ", "))
@@ -40,6 +40,8 @@ var _ = Describe("Agent integration", func() {
 		// Verify we got multiple topics (at least Bitcoin and Ethereum)
 		Expect(out.Assets).ToNot(BeEmpty(), "Expected at least one asset in the output")
 
-		fmt.Println(prettyPrint(out))
+		fmt.Println("--------------------------------")
+		fmt.Println(prettyPrint(out.Assets))
+
 	})
 })
