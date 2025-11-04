@@ -2,6 +2,7 @@ package agent
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/gopher-lab/gopher-client/client"
 	"github.com/masa-finance/tee-worker/v2/api/args/web"
@@ -41,12 +42,10 @@ func (t *WebSearch) Tool() openai.Tool {
 }
 
 // Execute executes the tool. Signature follows Cogito's ToolDefinitionInterface expectations.
-// Expects params to include either {"url": "..."} or raw url under a heuristic.
+// Expects params to include {"url": "..."} per the schema definition.
 func (t *WebSearch) Execute(params map[string]any) (string, error) {
 	var url string
 	if q, ok := params["url"].(string); ok {
-		url = q
-	} else if q, ok := params["url"].(string); ok {
 		url = q
 	} else {
 		b, _ := json.Marshal(params)
@@ -58,29 +57,16 @@ func (t *WebSearch) Execute(params map[string]any) (string, error) {
 
 	docs, err := t.Client.ScrapeWebWithArgs(args)
 	if err != nil {
+		// If this is a timeout error, return a user-friendly message that the framework can use
+		// The framework will convert this to a result string and continue execution
+		if isTimeoutError(err) {
+			return "", fmt.Errorf("web search timed out for URL %s: %v", url, err)
+		}
 		return "", err
 	}
 
-	// Extract both content and metadata.markdown from documents
-	type docResult struct {
-		Content  string `json:"content"`
-		Markdown string `json:"markdown,omitempty"`
-	}
-
-	results := make([]docResult, 0, len(docs))
-	for _, d := range docs {
-		markdown := ""
-		if d.Metadata != nil {
-			if md, ok := d.Metadata["markdown"].(string); ok {
-				markdown = md
-			}
-		}
-		results = append(results, docResult{
-			Content:  d.Content, // llm summary
-			Markdown: markdown,
-		})
-	}
-
-	b, _ := json.Marshal(results)
+	// Return full documents - lean structure with useful metadata (title, canonicalUrl, markdown, etc.)
+	// Embedding and Score are omitempty so won't be serialized
+	b, _ := json.Marshal(docs)
 	return string(b), nil
 }

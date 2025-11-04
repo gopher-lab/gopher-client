@@ -2,9 +2,10 @@ package agent
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/gopher-lab/gopher-client/client"
-    "github.com/masa-finance/tee-worker/v2/api/args/twitter"
+	"github.com/masa-finance/tee-worker/v2/api/args/twitter"
 	openai "github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
 )
@@ -18,32 +19,15 @@ love OR hate 	containing either "love" or "hate" (or both).
 beer -root 	containing "beer" but not "root".
 #haiku 	containing the hashtag "haiku".
 from:interior 	sent from Twitter account "interior".
-list:NASA/astronauts-in-space-now 	sent from a Twitter account in the NASA list astronauts-in-space-now
 to:NASA 	a Tweet authored in reply to Twitter account "NASA".
 @NASA 	mentioning Twitter account "NASA".
-puppy filter:media 	containing "puppy" and an image or video.
-puppy -filter:retweets 	containing "puppy", filtering out retweets
-puppy filter:native_video 	containing "puppy" and an uploaded video, Amplify video, Periscope, or Vine.
-puppy filter:periscope 	containing "puppy" and a Periscope video URL.
-puppy filter:vine 	containing "puppy" and a Vine.
-puppy filter:images 	containing "puppy" and links identified as photos, including third parties such as Instagram.
-puppy filter:twimg 	containing "puppy" and a pic.twitter.com link representing one or more photos.
-hilarious filter:links 	containing "hilarious" and linking to URL.
-puppy url:amazon 	containing "puppy" and a URL with the word "amazon" anywhere within it.
 superhero since:2015-12-21 	containing "superhero" and sent since date "2015-12-21" (year-month-day).
 puppy until:2015-12-21 	containing "puppy" and sent before the date "2015-12-21".
-movie -scary :) 	containing "movie", but not "scary", and with a positive attitude.
-flight :( 	containing "flight" and with a negative attitude.
-traffic ? 	containing "traffic" and asking a question.
-
-Example:
-
-altcoin or bitcoin :)
 
 To search for the same day, you must subtract a day between since and until:
 altcoin or bitcoin :) since:2025-03-23 until:2025-03-24
 
-If no date range is specified, default to the last 7 days.
+If no date range is specified, default to the last 1 day.
 `
 
 // TwitterSearch is a Cogito tool that bridges to the client's SearchTwitterWithArgs
@@ -56,7 +40,7 @@ func (t *TwitterSearch) Name() string {
 }
 
 func (t *TwitterSearch) Description() string {
-	return "Search Twitter using the provided query. Include operators, since/until. Defaults to last 7 days if none provided."
+	return "Search Twitter using the provided query. Include operators, since/until. Defaults to last 1 day if none provided."
 }
 
 // Tool describes the tool for the underlying LLM provider (OpenAI-compatible)
@@ -78,12 +62,10 @@ func (t *TwitterSearch) Tool() openai.Tool {
 }
 
 // Execute executes the tool. Signature follows Cogito's ToolDefinitionInterface expectations.
-// Expects params to include either {"query": "..."} or raw query under a heuristic.
+// Expects params to include {"query": "..."} per the schema definition.
 func (t *TwitterSearch) Execute(params map[string]any) (string, error) {
 	var query string
 	if q, ok := params["query"].(string); ok {
-		query = q
-	} else if q, ok := params["input"].(string); ok {
 		query = q
 	} else {
 		b, _ := json.Marshal(params)
@@ -95,15 +77,16 @@ func (t *TwitterSearch) Execute(params map[string]any) (string, error) {
 
 	docs, err := t.Client.SearchTwitterWithArgs(args)
 	if err != nil {
+		// If this is a timeout error, return a user-friendly message that the framework can use
+		// The framework will convert this to a result string and continue execution
+		if isTimeoutError(err) {
+			return "", fmt.Errorf("twitter search timed out for query %s: %v", query, err)
+		}
 		return "", err
 	}
 
-	// Extract only the content field from documents
-	contents := make([]string, 0, len(docs))
-	for _, d := range docs {
-		contents = append(contents, d.Content)
-	}
-
-	b, _ := json.Marshal(contents)
+	// Return full documents - lean structure with useful metadata (username, created_at, likes, etc.)
+	// Embedding and Score are omitempty so won't be serialized
+	b, _ := json.Marshal(docs)
 	return string(b), nil
 }

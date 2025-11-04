@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/mudler/cogito"
@@ -74,29 +75,28 @@ func DefaultSchema() jsonschema.Definition {
 		Type:                 jsonschema.Object,
 		AdditionalProperties: false,
 		Properties: map[string]jsonschema.Definition{
-			"topics": {
+			"assets": {
 				Type:        jsonschema.Array,
-				Description: "Trending topics with sentiment and influencers",
+				Description: "Track the market sentiment of assets, such as Bitcoin, Ethereum, and other cryptocurrencies.",
 				Items: &jsonschema.Definition{
 					Type:                 jsonschema.Object,
 					AdditionalProperties: false,
 					Properties: map[string]jsonschema.Definition{
-						"topic":           {Type: jsonschema.String, Description: "Topic"},
-						"reasoning":       {Type: jsonschema.String, Description: "Reasoning about the topic"},
-						"sentiment":       {Type: jsonschema.String, Description: "bullish, bearish, or neutral"},
-						"top_influencers": {Type: jsonschema.Array, Items: &jsonschema.Definition{Type: jsonschema.String}},
+						"asset":     {Type: jsonschema.String, Description: "Asset name"},
+						"reasoning": {Type: jsonschema.String, Description: "Brief reasoning about the sentiment of the asset"},
+						"sentiment": {Type: jsonschema.Integer, Description: "Numeric sentiment score from 1-100, where 100 is the most bullish and 1 is the most bearish"},
 					},
-					Required: []string{"topic", "sentiment", "top_influencers"},
+					Required: []string{"asset", "reasoning", "sentiment"},
 				},
 			},
 		},
-		Required: []string{"topics"},
+		Required: []string{"assets"},
 	}
 }
 
 // DefaultFinalPrompt returns the default final prompt instruction
 func DefaultFinalPrompt() string {
-	return "Return now only a JSON object with fields: topics (ordered by most relevant, each with topic, sentiment as bullish/bearish/neutral, and top_influencers array)."
+	return "Return now only a JSON object with fields that match the supplied schema."
 }
 
 // New creates a new Agent with the provided OpenAI token and model. Model defaults to gpt-5-nano.
@@ -153,8 +153,7 @@ func (a *Agent) Query(ctx context.Context, query string, opts ...QueryOption) (*
 	}
 
 	// Build full prompt with query, instructions, and suffix
-	// Make it explicit that tools MUST be used
-	fullPrompt := query + "\n\nIMPORTANT: You MUST use the available tools (search_twitter and search_web) to gather data. Do not provide an answer without using these tools first."
+	fullPrompt := query
 	if options.Instructions != "" {
 		fullPrompt += "\n\n" + options.Instructions
 	}
@@ -170,10 +169,10 @@ func (a *Agent) Query(ctx context.Context, query string, opts ...QueryOption) (*
 		a.llm,
 		fragment,
 		cogito.WithContext(ctx),
-		cogito.WithIterations(3),    // Allow multiple tool calls in sequence
-		cogito.WithMaxAttempts(3),   // Allow multiple attempts for tool selection
+		cogito.WithIterations(2),    // Allow multiple tool calls in sequence
+		cogito.WithMaxAttempts(2),   // Allow multiple attempts for tool selection
 		cogito.WithForceReasoning(), // Force LLM to reason about tool usage
-		cogito.WithTools(&TwitterSearch{Client: a.Client}, &WebSearch{Client: a.Client}),
+		cogito.WithTools(&WebSearch{Client: a.Client}, &TwitterSearch{Client: a.Client}),
 	)
 	if err != nil {
 		return nil, err
@@ -183,6 +182,11 @@ func (a *Agent) Query(ctx context.Context, query string, opts ...QueryOption) (*
 	result, err := a.llm.Ask(ctx, improved.AddMessage("user", options.FinalPrompt))
 	if err != nil {
 		return nil, err
+	}
+
+	// Log the raw LLM response for debugging
+	if lastMsg := result.LastMessage(); lastMsg != nil {
+		fmt.Printf("DEBUG: LLM response before extraction: %s\n", lastMsg.Content)
 	}
 
 	out := &types.Output{}
@@ -197,8 +201,16 @@ func (a *Agent) Query(ctx context.Context, query string, opts ...QueryOption) (*
 	defer cancel()
 
 	if err := result.ExtractStructure(ctxExtract, a.llm, s); err != nil {
-		// If extraction fails, still return empty Output to avoid nil
-		// no-op
+		// If extraction fails, still return what we have (might be partial data)
+		// Log the error but don't fail completely - we might have some data
+		fmt.Printf("DEBUG: Extraction error (but returning partial results): %v\n", err)
+		// Continue to return out even if extraction failed - it might have partial data
+	}
+
+	// Check if we got any data
+	if len(out.Assets) == 0 {
+		// If no topics extracted, log this for debugging
+		fmt.Printf("DEBUG: No topics extracted. Tools called: %d\n", len(improved.Status.ToolsCalled))
 	}
 
 	return out, nil

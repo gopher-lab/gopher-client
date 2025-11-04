@@ -4,25 +4,19 @@ import (
 	"github.com/masa-finance/tee-worker/v2/api/types"
 )
 
-type Sentiment string
-type TopInfluencers []string
-type Topic string
-
-const (
-	SentimentBullish Sentiment = "bullish"
-	SentimentBearish Sentiment = "bearish"
-	SentimentNeutral Sentiment = "neutral"
-)
+type Sentiment uint
+type Reasoning string
+type Asset string
 
 // TopicSummary represents a topic with sentiment and influencers discovered by the agent
-type TopicSummary struct {
-	Topic          Topic          `json:"topic"`
-	Sentiment      Sentiment      `json:"sentiment"`
-	TopInfluencers TopInfluencers `json:"top_influencers"`
+type AssetSummary struct {
+	Asset     Asset     `json:"asset"`
+	Reasoning Reasoning `json:"reasoning"`
+	Sentiment Sentiment `json:"sentiment"`
 }
 
 // Output is the agent's structured output
 type Output struct {
-	Topics    []TopicSummary   `json:"topics"`
+	Assets    []AssetSummary   `json:"assets"`
 	Documents []types.Document `json:"documents,omitempty"`
 }
