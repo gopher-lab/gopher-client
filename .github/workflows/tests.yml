@@ -24,6 +24,18 @@ jobs:
         path: |
           cookies
         key: ${{ runner.os }}-cookies
+    - name: Verify environment variables
+      env:
+        OPENAI_TOKEN: ${{ secrets.OPENAI_TOKEN }}
+        GOPHER_CLIENT_TOKEN: ${{ secrets.GOPHER_CLIENT_TOKEN }}
+        GOPHER_CLIENT_URL: ${{ secrets.GOPHER_CLIENT_URL }}
+        GOPHER_CLIENT_TIMEOUT: ${{ secrets.GOPHER_CLIENT_TIMEOUT }}
+      run: |
+        echo "Checking environment variables..."
+        if [ -z "$OPENAI_TOKEN" ]; then echo "ERROR: OPENAI_TOKEN is not set"; exit 1; else echo "✓ OPENAI_TOKEN is set"; fi
+        if [ -z "$GOPHER_CLIENT_TOKEN" ]; then echo "ERROR: GOPHER_CLIENT_TOKEN is not set"; exit 1; else echo "✓ GOPHER_CLIENT_TOKEN is set (length: ${#GOPHER_CLIENT_TOKEN})"; fi
+        if [ -z "$GOPHER_CLIENT_URL" ]; then echo "ERROR: GOPHER_CLIENT_URL is not set"; exit 1; else echo "✓ GOPHER_CLIENT_URL is set: $GOPHER_CLIENT_URL"; fi
+        if [ -z "$GOPHER_CLIENT_TIMEOUT" ]; then echo "WARN: GOPHER_CLIENT_TIMEOUT is not set, will use default"; else echo "✓ GOPHER_CLIENT_TIMEOUT is set: $GOPHER_CLIENT_TIMEOUT"; fi
     - name: Run tests
       env:
         OPENAI_TOKEN: ${{ secrets.OPENAI_TOKEN }}

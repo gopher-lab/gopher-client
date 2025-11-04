@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/mudler/cogito"
@@ -30,14 +31,27 @@ const (
 	DefaultPromptSuffix = "If no date range is specified, search the last 1 day"
 	// DefaultDataCollectionInstructions provides explicit guidance about trying all sources
 	DefaultDataCollectionInstructions = `
+CRITICAL: You MUST use the available tools to gather data. Do NOT attempt to answer without using tools.
+
+You have access to these tools:
+1. search_web - Search and scrape web pages
+2. search_twitter - Search Twitter for tweets from specific accounts
+
+REQUIRED ACTIONS:
+1. You MUST use search_web to fetch data from the provided websites
+2. You MUST use search_twitter to gather sentiment from Twitter accounts
+3. Do NOT skip using tools - they are required to complete this task
+
 IMPORTANT: You must attempt to gather data from ALL available sources, even if some fail.
 - Try ALL websites provided, even if some URLs timeout or return errors
-- Execute Twitter searches for sentiment analysis, but IMPORTANT: Randomly sample Twitter accounts and query ONLY 1 account per search
-  - Randomly select 1 account from the provided list for each search
+- Execute Twitter searches for sentiment analysis, but IMPORTANT: Randomly sample Twitter accounts
+  - Randomly select accounts from the provided list (typically 3-6 accounts for good coverage)
   - DO NOT exhaustively query all accounts - a random sample is sufficient
   - Query format: 'from:username (BTC OR Bitcoin OR ETH OR Ethereum OR SOL OR Solana)' - NO SPACE after 'from:' (e.g., 'from:JamesWynnReal', NOT 'from: JamesWynnReal')
   - Use hashtags and keywords: '#BTC OR #ETH OR bitcoin OR ethereum'
-  - Example correct query: 'from:JamesWynnReal (BTC OR Bitcoin OR ETH OR Ethereum) since:2025-11-03'
+  - For faster execution, you can batch multiple queries using the 'queries' array parameter - this will execute them concurrently
+  - Example single query: 'from:JamesWynnReal (BTC OR Bitcoin OR ETH OR Ethereum) since:2025-11-03'
+  - Example batch queries: ["from:JamesWynnReal (BTC OR Bitcoin) since:2025-11-03", "from:CryptoWendyO (ETH OR Ethereum) since:2025-11-03", "from:PeterLBrandt (SOL OR Solana) since:2025-11-03"]
 - Continue with remaining sources even if earlier sources fail
 - Partial data is acceptable - gather what you can from each source
 - Use multiple iterations to systematically collect data from all sources before synthesizing results
@@ -184,12 +198,16 @@ func (a *Agent) Query(ctx context.Context, query string, opts ...QueryOption) (*
 		a.llm,
 		fragment,
 		cogito.WithContext(ctx),
-		cogito.WithIterations(3),    // Reduced for faster testing (was 10)
+		cogito.WithIterations(6),    // Increased to allow more Twitter account sampling
 		cogito.WithMaxAttempts(1),   // Allow multiple attempts for tool selection
 		cogito.WithForceReasoning(), // Force LLM to reason about tool usage
 		cogito.WithTools(&WebSearch{Client: a.Client}, &TwitterSearch{Client: a.Client}),
 	)
 	if err != nil {
+		// Check if it's ErrNoToolSelected and provide a more helpful error
+		if errors.Is(err, cogito.ErrNoToolSelected) {
+			return nil, fmt.Errorf("LLM did not select any tools. This task requires using search_web and search_twitter tools to gather data: %w", err)
+		}
 		return nil, err
 	}
 
