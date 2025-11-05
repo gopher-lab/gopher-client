@@ -1,0 +1,41 @@
+name: Run Go Tests
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+    - name: Create .env file from secrets
+      run: |
+        cat > .env << EOF
+        OPENAI_TOKEN=${{ secrets.OPENAI_TOKEN }}
+        GOPHER_CLIENT_TOKEN=${{ secrets.GOPHER_CLIENT_TOKEN }}
+        GOPHER_CLIENT_URL=${{ secrets.GOPHER_CLIENT_URL }}
+        GOPHER_CLIENT_TIMEOUT=${{ secrets.GOPHER_CLIENT_TIMEOUT }}
+        EOF
+    - name: Run tests
+      run: make test
+
+  ready-to-merge:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Verify that merging is OK
+      run: |
+        if grep -rE 'DO[ ]NOT[ ]MERGE|[ ]FIXME' .; then
+            exit 1
+        fi
