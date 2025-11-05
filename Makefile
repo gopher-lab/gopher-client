@@ -59,10 +59,10 @@ run: build ## Build and run the application
 	@./$(BUILD_DIR)/$(BINARY_NAME)
 
 .PHONY: test
-test: deps ## Run client tests with coverage (used by GitHub Actions)
-	@echo "Running client tests with coverage..."
+test: deps ## Run tests with coverage (used by GitHub Actions)
+	@echo "Running tests with coverage..."
 	@mkdir -p $(COVERAGE_DIR)
-	@$(GOTEST) -v -count=1 -p=1 -coverprofile=$(COVERAGE_DIR)/coverage.txt -covermode=atomic ./client
+	@$(GOTEST) -v -count=1 -p=1 -coverprofile=$(COVERAGE_DIR)/coverage.txt -covermode=atomic $(TEST_ARGS)
 
 .PHONY: test-ginkgo
 test-ginkgo: deps ## Run tests using Ginkgo
