@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/gopher-lab/gopher-client/agent"
-	"github.com/gopher-lab/gopher-client/config"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -21,11 +20,6 @@ func prettyPrint(v any) string {
 
 var _ = Describe("Agent integration", func() {
 	It("creates Agent from config and performs sentiment analysis on assets", func() {
-		cfg := config.MustLoadConfig()
-		if cfg.OpenAIToken == "" {
-			Skip("OPENAI_TOKEN not set; skipping agent integration test")
-		}
-
 		ag, err := agent.NewAgentFromConfig()
 		Expect(err).ToNot(HaveOccurred())
 
