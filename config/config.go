@@ -13,10 +13,9 @@ import (
 )
 
 type Config struct {
-	BaseUrl     string        `envconfig:"GOPHER_CLIENT_URL" default:"https://data.gopher-ai.com/api"`
-	Timeout     time.Duration `envconfig:"GOPHER_CLIENT_TIMEOUT" default:"60s"`
-	Token       string        `envconfig:"GOPHER_CLIENT_TOKEN"`
-	OpenAIToken string        `envconfig:"OPENAI_TOKEN"`
+	BaseUrl string        `envconfig:"GOPHER_CLIENT_URL" default:"https://data.gopher-ai.com/api"`
+	Timeout time.Duration `envconfig:"GOPHER_CLIENT_TIMEOUT" default:"60s"`
+	Token   string        `envconfig:"GOPHER_CLIENT_TOKEN"`
 }
 
 // LoadConfig loads the Config from environment variables.
