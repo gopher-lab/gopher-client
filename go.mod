@@ -29,6 +29,3 @@ require (
 	golang.org/x/text v0.30.0 // indirect
 	golang.org/x/tools v0.37.0 // indirect
 )
-
-// Using specific commit from grantdfoster/cogito fork
-replace github.com/mudler/cogito => github.com/grantdfoster/cogito v0.0.0-20251104184711-4b65f4d0640a
