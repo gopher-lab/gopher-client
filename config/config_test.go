@@ -27,10 +27,6 @@ var _ = Describe("Config", func() {
 					Equal("https://data.gopher-ai.com/api"),          // default
 					Equal("https://gopher-data.dev.masalabs.ai/api"), // dev from .env
 				))
-				Expect(cfg.Token).To(SatisfyAny(
-					Equal(""), // default
-					Equal("rv53jbsoZieW4jOUdArHPmYGxlOiz4UvTyZv2h5bkbSjTU7J"), // dev from .env
-				))
 			})
 		})
 

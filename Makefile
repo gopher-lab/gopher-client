@@ -82,12 +82,6 @@ test-verbose: deps ## Run tests with verbose output
 	@mkdir -p $(COVERAGE_DIR)
 	@$(GOTEST) $(TEST_FLAGS) $(TEST_ARGS)
 
-.PHONY: test-agent
-test-agent: deps ## Run only agent package tests (lightweight)
-	@echo "Running agent package tests..."
-	@mkdir -p $(COVERAGE_DIR)
-	@$(GOTEST) -v -count=1 -p=1 -coverprofile=$(COVERAGE_DIR)/coverage.txt -covermode=atomic ./agent
-
 .PHONY: coverage
 coverage: test ## Generate and display coverage report
 	@echo "Generating coverage report..."
